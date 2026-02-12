@@ -1,0 +1,400 @@
+---
+import DashboardLayout from '../layouts/DashboardLayout.astro';
+---
+
+<DashboardLayout title="Clientes">
+  <div class="space-y-6">
+    <!-- Encabezado -->
+    <div class="bg-gradient-to-r from-pink-100 via-rose-100 to-purple-100 p-8 rounded-3xl shadow-xl border-4 border-pink-200">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="text-4xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">👥 Gestión de Clientes</h2>
+          <p class="text-rose-600 mt-2 text-lg">✨ Administra la información de tus clientes</p>
+        </div>
+        <button
+          id="btnNuevoCliente"
+          class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold py-4 px-8 rounded-2xl transition transform hover:scale-105 shadow-lg"
+        >
+          ➕ Nuevo Cliente
+        </button>
+      </div>
+    </div>
+
+    <!-- Búsqueda -->
+    <div class="bg-white p-6 rounded-3xl shadow-xl border-4 border-rose-200">
+      <div class="mb-3 flex items-center gap-2 text-rose-600">
+        <span class="font-bold">🔍 Búsqueda de Clientes</span>
+        <span class="text-sm bg-rose-100 px-3 py-1 rounded-full">Por nombre o teléfono</span>
+      </div>
+      <div class="flex gap-4">
+        <div class="flex-1">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="🔍 Buscar por nombre o teléfono..."
+            class="w-full px-6 py-4 border-2 border-pink-200 rounded-2xl focus:ring-4 focus:ring-pink-300 focus:border-pink-400 outline-none text-lg"
+          />
+        </div>
+        <button
+          id="btnBuscar"
+          class="bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-bold px-8 rounded-2xl transition shadow-lg"
+        >
+          🔍 Buscar
+        </button>
+        <button
+          id="btnVerTodos"
+          class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold px-8 rounded-2xl transition shadow-lg"
+        >
+          📊 Ver Todos
+        </button>
+      </div>
+    </div>
+
+    <!-- Lista de Clientes -->
+    <div class="bg-white p-8 rounded-3xl shadow-xl border-4 border-pink-200">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">📋 Lista de Clientes</h3>
+        <div id="countClientes" class="text-lg font-bold text-rose-600 bg-rose-100 px-4 py-2 rounded-xl"></div>
+      </div>
+      <div id="clientesList" class="space-y-4">
+        <!-- Los clientes se cargarán aquí -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Crear/Editar Cliente -->
+  <div id="clienteModal" class="hidden fixed inset-0 flex items-center justify-center z-50" style="backdrop-filter: blur(10px); background-color: rgba(0, 0, 0, 0.2);">
+    <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border-4 border-pink-300">
+      <div class="flex justify-between items-center mb-6">
+        <h3 id="modalTitle" class="text-3xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">🌸 Nuevo Cliente</h3>
+        <button id="btnCerrarModal" class="text-rose-500 hover:text-rose-700 text-3xl font-bold">✕</button>
+      </div>
+
+      <form id="clienteForm" class="space-y-4">
+        <input type="hidden" id="clienteId" />
+        
+        <div>
+          <label class="block text-rose-700 font-bold mb-2">👤 Nombre Completo *</label>
+          <input
+            type="text"
+            id="nombre"
+            required
+            class="w-full px-4 py-3 border-2 border-pink-200 rounded-xl focus:ring-4 focus:ring-pink-300 focus:border-pink-400 outline-none"
+            placeholder="Ej: Juan Pérez"
+          />
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-rose-700 font-bold mb-2">📞 Teléfono *</label>
+            <input
+              type="tel"
+              id="telefono"
+              required
+              class="w-full px-4 py-3 border-2 border-pink-200 rounded-xl focus:ring-4 focus:ring-pink-300 focus:border-pink-400 outline-none"
+              placeholder="555-1234"
+            />
+            <div id="errorTelefono" class="hidden mt-2 flex items-center gap-2 text-red-600 bg-red-50 border-2 border-red-300 px-3 py-2 rounded-lg">
+              <span class="text-xl">⚠️</span>
+              <span class="text-sm font-semibold" id="mensajeErrorTelefono"></span>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-rose-700 font-bold mb-2">📧 Email *</label>
+            <input
+              type="email"
+              id="email"
+              required
+              class="w-full px-4 py-3 border-2 border-pink-200 rounded-xl focus:ring-4 focus:ring-pink-300 focus:border-pink-400 outline-none"
+              placeholder="correo@example.com"
+            />
+            <div id="errorEmail" class="hidden mt-2 flex items-center gap-2 text-red-600 bg-red-50 border-2 border-red-300 px-3 py-2 rounded-lg">
+              <span class="text-xl">⚠️</span>
+              <span class="text-sm font-semibold" id="mensajeErrorEmail"></span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-rose-700 font-bold mb-2">📍 Dirección</label>
+          <input
+            type="text"
+            id="direccion"
+            class="w-full px-4 py-3 border-2 border-pink-200 rounded-xl focus:ring-4 focus:ring-pink-300 focus:border-pink-400 outline-none"
+            placeholder="Calle, Número, Ciudad"
+          />
+        </div>
+
+        <div class="flex gap-4 mt-6">
+          <button
+            type="submit"
+            class="flex-1 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold py-4 rounded-2xl transition shadow-lg"
+          >
+            💖 Guardar
+          </button>
+          <button
+            type="button"
+            id="btnCancelar"
+            class="flex-1 bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white font-bold py-4 rounded-2xl transition shadow-lg"
+          >
+            ❌ Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    import { storage } from '../lib/storage';
+    import { Auth } from '../lib/auth';
+    import type { Cliente, Mascota } from '../lib/types';
+
+    storage.init();
+
+    const session = Auth.getSession();
+    if (!session) {
+      window.location.href = '/';
+    }
+
+    const modal = document.getElementById('clienteModal')!;
+    const clienteForm = document.getElementById('clienteForm') as HTMLFormElement;
+    const clientesList = document.getElementById('clientesList')!;
+    const searchInput = document.getElementById('searchInput') as HTMLInputElement;
+
+    let editandoId: string | null = null;
+
+    // Función para renderizar clientes
+    function renderClientes(clientes: Cliente[]) {
+      const countEl = document.getElementById('countClientes');
+      if (countEl) {
+        countEl.textContent = `${clientes.length} ${clientes.length === 1 ? 'cliente' : 'clientes'}`;
+      }
+
+      if (clientes.length === 0) {
+        clientesList.innerHTML = '<p class="text-rose-500 text-center py-8 font-medium">🔍 No se encontraron clientes con los criterios de búsqueda</p>';
+        return;
+      }
+
+      clientesList.innerHTML = clientes.map(cliente => `
+        <div class="border-4 border-pink-200 bg-gradient-to-br from-pink-50 to-rose-50 p-6 rounded-2xl hover:shadow-2xl transition transform hover:scale-102">
+          <div class="flex justify-between items-start">
+            <div class="flex-1">
+              <h4 class="text-xl font-bold text-rose-700">👤 ${cliente.nombre}</h4>
+              <div class="mt-3 space-y-2 text-sm text-rose-600">
+                <p class="bg-white px-3 py-2 rounded-lg inline-block">📞 ${cliente.telefono}</p>
+                ${cliente.email ? `<p class="bg-white px-3 py-2 rounded-lg inline-block ml-2">📧 ${cliente.email}</p>` : ''}
+                ${cliente.direccion ? `<p class="bg-white px-3 py-2 rounded-lg mt-2">📍 ${cliente.direccion}</p>` : ''}
+                <p class="text-xs text-rose-500 mt-2">📅 Registro: ${new Date(cliente.fechaRegistro).toLocaleDateString()}</p>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button
+                onclick="editarCliente('${cliente.id}')"
+                class="bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-white px-4 py-2 rounded-xl transition shadow-lg"
+              >
+                ✏️ Editar
+              </button>
+              <button
+                onclick="eliminarCliente('${cliente.id}', '${cliente.nombre}')"
+                class="bg-gradient-to-r from-red-400 to-rose-500 hover:from-red-500 hover:to-rose-600 text-white px-4 py-2 rounded-xl transition shadow-lg"
+              >
+                🗑️ Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Cargar todos los clientes
+    function cargarClientes() {
+      const clientes = storage.getClientes(session!.veterinariaId);
+      renderClientes(clientes);
+    }
+
+    // Abrir modal para nuevo cliente
+    document.getElementById('btnNuevoCliente')!.addEventListener('click', () => {
+      editandoId = null;
+      clienteForm.reset();
+      limpiarErrores();
+      document.getElementById('clienteId')!.setAttribute('value', '');
+      (document.getElementById('modalTitle') as HTMLElement).textContent = 'Nuevo Cliente';
+      modal.classList.remove('hidden');
+    });
+
+    // Cerrar modal
+    function cerrarModal() {
+      modal.classList.add('hidden');
+      clienteForm.reset();
+      limpiarErrores();
+      editandoId = null;
+    }
+
+    document.getElementById('btnCerrarModal')!.addEventListener('click', cerrarModal);
+    document.getElementById('btnCancelar')!.addEventListener('click', cerrarModal);
+
+    // Función para mostrar error en campo
+    function mostrarError(campo: 'telefono' | 'email', mensaje: string) {
+      const input = document.getElementById(campo) as HTMLInputElement;
+      const errorDiv = document.getElementById(`error${campo.charAt(0).toUpperCase() + campo.slice(1)}`)!;
+      const mensajeError = document.getElementById(`mensajeError${campo.charAt(0).toUpperCase() + campo.slice(1)}`)!;
+      
+      input.classList.remove('border-pink-200');
+      input.classList.add('border-red-500', 'bg-red-50');
+      errorDiv.classList.remove('hidden');
+      mensajeError.textContent = mensaje;
+      
+      // Hacer scroll al campo con error
+      input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      input.focus();
+    }
+
+    // Función para limpiar errores
+    function limpiarErrores() {
+      ['telefono', 'email'].forEach(campo => {
+        const input = document.getElementById(campo) as HTMLInputElement;
+        const errorDiv = document.getElementById(`error${campo.charAt(0).toUpperCase() + campo.slice(1)}`)!;
+        
+        input.classList.remove('border-red-500', 'bg-red-50');
+        input.classList.add('border-pink-200');
+        errorDiv.classList.add('hidden');
+      });
+    }
+
+    // Guardar cliente
+    clienteForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      // Limpiar errores previos
+      limpiarErrores();
+
+      const nombre = (document.getElementById('nombre') as HTMLInputElement).value;
+      const telefono = (document.getElementById('telefono') as HTMLInputElement).value;
+      const email = (document.getElementById('email') as HTMLInputElement).value;
+      const direccion = (document.getElementById('direccion') as HTMLInputElement).value;
+
+      // Validar duplicados de teléfono y email
+      const todosClientes = storage.getClientes(session!.veterinariaId);
+      
+      // Verificar teléfono duplicado
+      const telefonoDuplicado = todosClientes.find(c => 
+        c.telefono === telefono && c.id !== editandoId
+      );
+      
+      if (telefonoDuplicado) {
+        mostrarError('telefono', `Ya registrado para: ${telefonoDuplicado.nombre}`);
+        return;
+      }
+
+      // Verificar email duplicado
+      if (email) {
+        const emailDuplicado = todosClientes.find(c => 
+          c.email && c.email.toLowerCase() === email.toLowerCase() && c.id !== editandoId
+        );
+        
+        if (emailDuplicado) {
+          mostrarError('email', `Ya registrado para: ${emailDuplicado.nombre}`);
+          return;
+        }
+      }
+
+      if (editandoId) {
+        // Actualizar cliente existente
+        storage.updateCliente(editandoId, {
+          nombre,
+          telefono,
+          email,
+          direccion
+        });
+      } else {
+        // Crear nuevo cliente
+        const nuevoCliente: Cliente = {
+          id: `cli-${Date.now()}`,
+          nombre,
+          telefono,
+          email,
+          direccion,
+          veterinariaId: session!.veterinariaId,
+          fechaRegistro: new Date().toISOString()
+        };
+        storage.saveCliente(nuevoCliente);
+      }
+
+      cerrarModal();
+      cargarClientes();
+    });
+
+    // Editar cliente
+    (window as any).editarCliente = (id: string) => {
+      const clientes = storage.getClientes(session!.veterinariaId);
+      const cliente = clientes.find(c => c.id === id);
+      
+      if (cliente) {
+        editandoId = id;
+        limpiarErrores();
+        (document.getElementById('nombre') as HTMLInputElement).value = cliente.nombre;
+        (document.getElementById('telefono') as HTMLInputElement).value = cliente.telefono;
+        (document.getElementById('email') as HTMLInputElement).value = cliente.email || '';
+        (document.getElementById('direccion') as HTMLInputElement).value = cliente.direccion || '';
+        (document.getElementById('modalTitle') as HTMLElement).textContent = 'Editar Cliente';
+        modal.classList.remove('hidden');
+      }
+    };
+
+    // Eliminar cliente
+    (window as any).eliminarCliente = (id: string, nombre: string) => {
+      // Verificar si el cliente tiene mascotas asociadas
+      const mascotas = storage.getMascotasByCliente(id);
+      let mensaje = `¿Estás seguro de eliminar al cliente "${nombre}"?`;
+      
+      if (mascotas.length > 0) {
+        mensaje += `\n\n⚠️ ADVERTENCIA: Este cliente tiene ${mascotas.length} ${mascotas.length === 1 ? 'mascota registrada' : 'mascotas registradas'}:\n`;
+        mascotas.forEach(m => {
+          mensaje += `\n• ${m.nombre} (${m.especie})`;
+        });
+        mensaje += '\n\nEstas mascotas también serán eliminadas.';
+      }
+      
+      if (confirm(mensaje)) {
+        // Eliminar las mascotas asociadas primero
+        mascotas.forEach(m => {
+          storage.deleteMascota(m.id);
+        });
+        
+        // Eliminar el cliente
+        storage.deleteCliente(id);
+        cargarClientes();
+      }
+    };
+
+    // Buscar cliente
+    document.getElementById('btnBuscar')!.addEventListener('click', () => {
+      const termino = searchInput.value.trim();
+      if (termino) {
+        const resultados = storage.buscarClientes(termino, session!.veterinariaId);
+        renderClientes(resultados);
+      }
+    });
+
+    // Ver todos los clientes
+    document.getElementById('btnVerTodos')!.addEventListener('click', () => {
+      searchInput.value = '';
+      cargarClientes();
+    });
+
+    // Búsqueda en tiempo real
+    searchInput.addEventListener('input', () => {
+      const termino = searchInput.value.trim();
+      if (termino) {
+        const resultados = storage.buscarClientes(termino, session!.veterinariaId);
+        renderClientes(resultados);
+      } else {
+        cargarClientes();
+      }
+    });
+
+    // Cargar clientes al iniciar
+    cargarClientes();
+  </script>
+</DashboardLayout>

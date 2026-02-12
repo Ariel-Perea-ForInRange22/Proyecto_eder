@@ -1,0 +1,161 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Registro">
+  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-200 via-pink-100 to-rose-200 py-8">
+    <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border-4 border-purple-200">
+      <div class="text-center mb-6">
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent mb-2">🌸 Registro de Usuario</h1>
+        <p class="text-purple-600 font-medium">✨ Crear nueva cuenta</p>
+      </div>
+
+      <form id="registerForm" class="space-y-4">
+        <div>
+          <label class="block text-purple-700 font-bold mb-2">👤 Nombre Completo</label>
+          <input
+            type="text"
+            id="nombre"
+            required
+            class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 outline-none transition"
+            placeholder="Ej: Dr. Juan Pérez"
+          />
+        </div>
+
+        <div>
+          <label class="block text-purple-700 font-bold mb-2">👤 Usuario</label>
+          <input
+            type="text"
+            id="username"
+            required
+            class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 outline-none transition"
+            placeholder="Nombre de usuario"
+          />
+        </div>
+
+        <div>
+          <label class="block text-purple-700 font-bold mb-2">📞 Teléfono</label>
+          <input
+            type="tel"
+            id="telefono"
+            required
+            class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 outline-none transition"
+            placeholder="Ej: 555-1234"
+          />
+        </div>
+
+        <div>
+          <label class="block text-purple-700 font-bold mb-2">🔒 Contraseña</label>
+          <input
+            type="password"
+            id="password"
+            required
+            class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 outline-none transition"
+            placeholder="Mínimo 6 caracteres"
+          />
+        </div>
+
+        <div>
+          <label class="block text-purple-700 font-bold mb-2">⭐ Rol</label>
+          <select
+            id="rol"
+            required
+            class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 outline-none transition bg-gradient-to-r from-purple-50 to-pink-50"
+          >
+            <option value="veterinario">Veterinario</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </div>
+
+        <div id="errorMsg" class="hidden bg-rose-100 border-2 border-rose-300 text-rose-700 px-4 py-3 rounded-xl text-sm font-medium"></div>
+        <div id="successMsg" class="hidden bg-green-100 border-2 border-green-300 text-green-700 px-4 py-3 rounded-xl text-sm font-medium"></div>
+
+        <button
+          type="submit"
+          class="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3 px-4 rounded-xl transition transform hover:scale-105 shadow-lg"
+        >
+          💖 Registrarse
+        </button>
+
+        <div class="text-center">
+          <p class="text-gray-600">
+            ¿Ya tienes cuenta?
+            <a href="/login" class="text-purple-600 hover:text-purple-700 font-medium">✨ Inicia sesión</a>
+          </p>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    import { storage } from '../lib/storage';
+    import { Auth } from '../lib/auth';
+    import type { Usuario } from '../lib/types';
+
+    storage.init();
+
+    const registerForm = document.getElementById('registerForm') as HTMLFormElement;
+    const errorMsg = document.getElementById('errorMsg') as HTMLDivElement;
+    const successMsg = document.getElementById('successMsg') as HTMLDivElement;
+
+    registerForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const nombre = (document.getElementById('nombre') as HTMLInputElement).value;
+      const username = (document.getElementById('username') as HTMLInputElement).value;
+      const telefono = (document.getElementById('telefono') as HTMLInputElement).value;
+      const password = (document.getElementById('password') as HTMLInputElement).value;
+      const rol = (document.getElementById('rol') as HTMLSelectElement).value as 'admin' | 'veterinario';
+
+      if (password.length < 6) {
+        errorMsg.textContent = 'La contraseña debe tener al menos 6 caracteres';
+        errorMsg.classList.remove('hidden');
+        successMsg.classList.add('hidden');
+        return;
+      }
+
+      // Verificar si el usuario ya existe
+      const usuarios = storage.getUsuarios();
+      if (usuarios.some(u => u.username === username)) {
+        errorMsg.textContent = 'El nombre de usuario ya existe';
+        errorMsg.classList.remove('hidden');
+        successMsg.classList.add('hidden');
+        return;
+      }
+
+      // Verificar si el teléfono ya está registrado
+      const telefonoExistente = usuarios.find(u => u.telefono === telefono);
+      if (telefonoExistente) {
+        errorMsg.textContent = `⚠️ TELÉFONO DUPLICADO\n\nEl número "${telefono}" ya está registrado para:\n\n👤 ${telefonoExistente.nombre}\n\nPor favor, usa otro número de teléfono.`;
+        errorMsg.classList.remove('hidden');
+        successMsg.classList.add('hidden');
+        return;
+      }
+
+      try {
+        const newUsuario: Omit<Usuario, 'id'> = {
+          username,
+          password,
+          nombre,
+          telefono,
+          rol,
+          veterinariaId: 'vet-1' // Por defecto la primera veterinaria
+        };
+
+        Auth.register(newUsuario);
+        
+        successMsg.textContent = 'Registro exitoso. Redirigiendo...';
+        successMsg.classList.remove('hidden');
+        errorMsg.classList.add('hidden');
+
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 1500);
+      } catch (error) {
+        errorMsg.textContent = 'Error al registrar usuario';
+        errorMsg.classList.remove('hidden');
+        successMsg.classList.add('hidden');
+      }
+    });
+  </script>
+</Layout>

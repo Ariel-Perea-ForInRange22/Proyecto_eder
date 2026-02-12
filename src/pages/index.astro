@@ -1,0 +1,68 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Inicio">
+  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-200 via-rose-100 to-purple-200">
+    <div class="text-center">
+      <div class="mb-8">
+        <h1 class="text-6xl font-bold mb-4 bg-gradient-to-r from-pink-500 via-rose-500 to-purple-500 bg-clip-text text-transparent">🏥 Sistema Veterinaria</h1>
+        <p class="text-2xl text-rose-700 mb-8">Gestión integral para clínicas veterinarias</p>
+      </div>
+
+      <div class="bg-white bg-opacity-95 backdrop-blur-lg p-8 rounded-3xl shadow-2xl max-w-md mx-auto border-4 border-pink-200">
+        <div class="space-y-4 mb-6">
+          <div class="flex items-center gap-4 text-left bg-gradient-to-r from-pink-50 to-rose-50 p-4 rounded-xl">
+            <span class="text-3xl">👥</span>
+            <div>
+              <h3 class="font-bold text-rose-700">Gestión de Clientes</h3>
+              <p class="text-sm text-rose-600">Administra información de tus clientes</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 text-left bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-xl">
+            <span class="text-3xl">🐾</span>
+            <div>
+              <h3 class="font-bold text-purple-700">Gestión de Mascotas</h3>
+              <p class="text-sm text-purple-600">Registra y consulta datos de mascotas</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 text-left bg-gradient-to-r from-rose-50 to-purple-50 p-4 rounded-xl">
+            <span class="text-3xl">🔍</span>
+            <div>
+              <h3 class="font-bold text-rose-700">Búsqueda Avanzada</h3>
+              <p class="text-sm text-rose-600">Encuentra clientes por nombre o teléfono</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-3 mt-8">
+          <a
+            href="/login"
+            class="bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold py-3 px-6 rounded-xl hover:from-pink-600 hover:to-rose-600 transition transform hover:scale-105 shadow-lg"
+          >
+            ✨ Iniciar Sesión
+          </a>
+          <a
+            href="/registro"
+            class="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-pink-600 transition transform hover:scale-105 shadow-lg"
+          >
+            🌸 Registrarse
+          </a>
+        </div>
+      </div>
+
+      <p class="mt-8 text-rose-700 text-sm font-medium">
+        💖 Sistema completo de gestión veterinaria con múltiples veterinarios
+      </p>
+    </div>
+  </div>
+
+  <script>
+    import { Auth } from '../lib/auth';
+    
+    // Si ya hay sesión activa, redirigir al dashboard
+    if (Auth.isAuthenticated()) {
+      window.location.href = '/dashboard';
+    }
+  </script>
+</Layout>

@@ -1,0 +1,56 @@
+---
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+import '../styles/global.css';
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title} - Sistema Veterinaria</title>
+</head>
+<body class="bg-gradient-to-br from-pink-50 via-rose-50 to-purple-50 min-h-screen">
+  <nav class="bg-gradient-to-r from-pink-400 via-rose-400 to-purple-400 text-white shadow-2xl">
+    <div class="container mx-auto px-4 py-4">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center gap-6">
+          <h1 class="text-2xl font-bold drop-shadow-lg">🏥 Sistema Veterinaria</h1>
+          <div class="flex gap-2">
+            <a href="/dashboard" class="hover:bg-white hover:bg-opacity-20 px-4 py-2 rounded-xl transition backdrop-blur-sm">📊 Dashboard</a>
+            <a href="/clientes" class="hover:bg-white hover:bg-opacity-20 px-4 py-2 rounded-xl transition backdrop-blur-sm">👥 Clientes</a>
+            <a href="/mascotas" class="hover:bg-white hover:bg-opacity-20 px-4 py-2 rounded-xl transition backdrop-blur-sm">🐾 Mascotas</a>
+            <a href="/productos" class="hover:bg-white hover:bg-opacity-20 px-4 py-2 rounded-xl transition backdrop-blur-sm">🛒 Productos</a>
+          </div>
+        </div>
+        <button id="logoutBtn" class="bg-rose-600 hover:bg-rose-700 px-4 py-2 rounded-xl transition shadow-lg">
+          ✨ Cerrar Sesión
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container mx-auto px-4 py-8">
+    <slot />
+  </main>
+
+  <script>
+    document.getElementById('logoutBtn')?.addEventListener('click', () => {
+      localStorage.removeItem('vet_session');
+      window.location.href = '/';
+    });
+
+    // Verificar autenticación
+    if (typeof window !== 'undefined') {
+      const session = localStorage.getItem('vet_session');
+      if (!session) {
+        window.location.href = '/';
+      }
+    }
+  </script>
+</body>
+</html>

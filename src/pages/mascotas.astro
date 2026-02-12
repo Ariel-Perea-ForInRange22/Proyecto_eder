@@ -1,0 +1,584 @@
+---
+import DashboardLayout from '../layouts/DashboardLayout.astro';
+---
+
+<DashboardLayout title="Mascotas">
+  <div class="space-y-6">
+    <!-- Encabezado -->
+    <div class="bg-gradient-to-r from-purple-100 via-pink-100 to-rose-100 p-8 rounded-3xl shadow-xl border-4 border-purple-200">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">🐾 Gestión de Mascotas</h2>
+          <p class="text-purple-600 mt-2 text-lg">✨ Administra la información de las mascotas</p>
+        </div>
+        <button
+          id="btnNuevaMascota"
+          class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-4 px-8 rounded-2xl transition transform hover:scale-105 shadow-lg"
+        >
+          ➕ Nueva Mascota
+        </button>
+      </div>
+    </div>
+
+    <!-- Búsqueda y Filtros -->
+    <div class="bg-white p-6 rounded-3xl shadow-xl border-4 border-pink-200">
+      <div class="mb-3 flex items-center gap-2 text-purple-600">
+        <span class="font-bold">🔍 Filtros de Búsqueda</span>
+        <span class="text-sm bg-purple-100 px-3 py-1 rounded-full">Puedes combinar múltiples filtros</span>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+        <div class="md:col-span-4">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="🔍 Buscar por nombre de mascota..."
+            class="w-full px-6 py-4 border-2 border-purple-200 rounded-2xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 outline-none text-lg"
+          />
+        </div>
+        <div class="md:col-span-3 space-y-2">
+          <input
+            type="text"
+            id="buscarClienteFiltro"
+            placeholder="🔍 Buscar cliente..."
+            class="w-full px-4 py-2 border-2 border-rose-200 rounded-xl focus:ring-4 focus:ring-rose-300 focus:border-rose-400 outline-none text-sm bg-gradient-to-r from-rose-50 to-pink-50"
+          />
+          <select
+            id="clienteFilter"
+            class="w-full px-6 py-4 border-2 border-rose-200 rounded-2xl focus:ring-4 focus:ring-rose-300 outline-none bg-gradient-to-r from-rose-50 to-pink-50 font-medium text-rose-700"
+          >
+            <option value="">👥 Todos los clientes</option>
+          </select>
+        </div>
+        <div class="md:col-span-3">
+          <select
+            id="especieFilter"
+            class="w-full px-6 py-4 border-2 border-pink-200 rounded-2xl focus:ring-4 focus:ring-pink-300 outline-none bg-gradient-to-r from-pink-50 to-purple-50 font-medium text-purple-700"
+          >
+            <option value="">🌿 Todas las especies</option>
+            <option value="Perro">🐕 Perros</option>
+            <option value="Gato">🐈 Gatos</option>
+            <option value="Ave">🦜 Aves</option>
+            <option value="Conejo">🐰 Conejos</option>
+            <option value="Hámster">🐹 Hámsters</option>
+            <option value="Reptil">🦎 Reptiles</option>
+            <option value="Otro">🐾 Otros</option>
+          </select>
+        </div>
+        <div class="md:col-span-2">
+          <button
+            id="btnVerTodas"
+            class="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-bold px-6 py-4 rounded-2xl transition shadow-lg"
+          >
+            📊 Ver Todas
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de Mascotas -->
+    <div class="bg-white p-8 rounded-3xl shadow-xl border-4 border-purple-200">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">📋 Lista de Mascotas</h3>
+        <div id="countMascotas" class="text-lg font-bold text-purple-600 bg-purple-100 px-4 py-2 rounded-xl"></div>
+      </div>
+      
+      <!-- Información del cliente filtrado -->
+      <div id="clienteInfo" class="hidden mb-6 bg-gradient-to-r from-rose-100 to-pink-100 p-4 rounded-2xl border-2 border-rose-300">
+        <p class="text-rose-700 font-bold">📋 Mostrando mascotas de: <span id="clienteNombre"></span></p>
+        <p class="text-rose-600 text-sm" id="clienteContacto"></p>
+      </div>
+      
+      <div id="mascotasList" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Las mascotas se cargarán aquí -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Crear/Editar Mascota -->
+  <div id="mascotaModal" class="hidden fixed inset-0 flex items-center justify-center z-50" style="backdrop-filter: blur(10px); background-color: rgba(0, 0, 0, 0.2);">
+    <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border-4 border-purple-300">
+      <div class="flex justify-between items-center mb-6">
+        <h3 id="modalTitle" class="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">🌸 Nueva Mascota</h3>
+        <button id="btnCerrarModal" class="text-purple-500 hover:text-purple-700 text-3xl font-bold">✕</button>
+      </div>
+
+      <form id="mascotaForm" class="space-y-4">
+        <input type="hidden" id="mascotaId" />
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-purple-700 font-bold mb-2">🐾 Nombre de Mascota *</label>
+            <input
+              type="text"
+              id="nombre"
+              required
+              class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 outline-none"
+              placeholder="Ej: Max"
+            />
+          </div>
+
+          <div>
+            <label class="block text-purple-700 font-bold mb-2">🌿 Especie *</label>
+            <select
+              id="especie"
+              required
+              class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 outline-none bg-gradient-to-r from-purple-50 to-pink-50"
+            >
+              <option value="">Seleccionar...</option>
+              <option value="Perro">🐕 Perro</option>
+              <option value="Gato">🐈 Gato</option>
+              <option value="Ave">🦜 Ave</option>
+              <option value="Conejo">🐰 Conejo</option>
+              <option value="Hámster">🐹 Hámster</option>
+              <option value="Reptil">🦎 Reptil</option>
+              <option value="Otro">🐾 Otro</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-purple-700 font-bold mb-2">🏆 Raza</label>
+            <input
+              type="text"
+              id="raza"
+              class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 outline-none"
+              placeholder="Ej: Labrador"
+            />
+          </div>
+
+          <div>
+            <label class="block text-purple-700 font-bold mb-2">🎂 Edad (años) *</label>
+            <input
+              type="number"
+              id="edad"
+              required
+              min="0"
+              max="50"
+              class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 outline-none"
+              placeholder="0"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-purple-700 font-bold mb-2">👤 Dueño (Cliente) *</label>
+          <input
+            type="text"
+            id="buscarCliente"
+            placeholder="🔍 Buscar cliente por nombre o teléfono..."
+            class="w-full px-4 py-3 mb-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 outline-none bg-gradient-to-r from-purple-50 to-pink-50"
+          />
+          <select
+            id="clienteId"
+            required
+            class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 outline-none bg-white"
+          >
+            <option value="">Seleccionar cliente...</option>
+          </select>
+          <div id="clienteSeleccionadoInfo" class="hidden mt-3 bg-gradient-to-r from-purple-100 to-pink-100 p-3 rounded-xl border-2 border-purple-300">
+            <p class="text-sm font-semibold text-purple-700">
+              ✅ Cliente: <span id="nombreClienteSeleccionado"></span>
+            </p>
+            <p class="text-xs text-purple-600 mt-1" id="infoClienteSeleccionado"></p>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-purple-700 font-bold mb-2">📝 Observaciones</label>
+          <textarea
+            id="observaciones"
+            rows="3"
+            class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 outline-none"
+            placeholder="Notas médicas, alergias, vacunas, etc."
+          ></textarea>
+        </div>
+
+        <div class="flex gap-4 mt-6">
+          <button
+            type="submit"
+            class="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-4 rounded-2xl transition shadow-lg"
+          >
+            💖 Guardar
+          </button>
+          <button
+            type="button"
+            id="btnCancelar"
+            class="flex-1 bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white font-bold py-4 rounded-2xl transition shadow-lg"
+          >
+            ❌ Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    import { storage } from '../lib/storage';
+    import { Auth } from '../lib/auth';
+    import type { Mascota, Cliente } from '../lib/types';
+
+    storage.init();
+
+    const session = Auth.getSession();
+    if (!session) {
+      window.location.href = '/';
+    }
+
+    const modal = document.getElementById('mascotaModal')!;
+    const mascotaForm = document.getElementById('mascotaForm') as HTMLFormElement;
+    const mascotasList = document.getElementById('mascotasList')!;
+    const searchInput = document.getElementById('searchInput') as HTMLInputElement;
+    const clienteFilter = document.getElementById('clienteFilter') as HTMLSelectElement;
+    const especieFilter = document.getElementById('especieFilter') as HTMLSelectElement;
+
+    let editandoId: string | null = null;
+
+    // Obtener emoji según especie
+    function getEmojiEspecie(especie: string): string {
+      const emojis: { [key: string]: string } = {
+        'Perro': '🐕',
+        'Gato': '🐈',
+        'Ave': '🦜',
+        'Conejo': '🐰',
+        'Hámster': '🐹',
+        'Reptil': '🦎',
+        'Otro': '🐾'
+      };
+      return emojis[especie] || '🐾';
+    }
+
+    // Función para renderizar mascotas
+    function renderMascotas(mascotas: Mascota[]) {
+      const countEl = document.getElementById('countMascotas');
+      if (countEl) {
+        countEl.textContent = `${mascotas.length} ${mascotas.length === 1 ? 'mascota' : 'mascotas'}`;
+      }
+
+      if (mascotas.length === 0) {
+        mascotasList.innerHTML = '<p class="col-span-2 text-purple-500 text-center py-8 font-medium">🔍 No se encontraron mascotas con los criterios seleccionados</p>';
+        return;
+      }
+
+      const clientes = storage.getClientes(session!.veterinariaId);
+
+      mascotasList.innerHTML = mascotas.map(mascota => {
+        const cliente = clientes.find(c => c.id === mascota.clienteId);
+        const emoji = getEmojiEspecie(mascota.especie);
+        
+        return `
+          <div class="border-4 border-purple-200 bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 p-6 rounded-2xl hover:shadow-2xl transition transform hover:scale-105">
+            <div class="flex items-start gap-4">
+              <div class="text-5xl drop-shadow-lg">${emoji}</div>
+              <div class="flex-1">
+                <h4 class="text-2xl font-bold text-purple-700">${mascota.nombre}</h4>
+                <div class="mt-3 space-y-2 text-sm text-purple-600">
+                  <p class="bg-white px-3 py-2 rounded-lg inline-block"><span class="font-bold">🌿 Especie:</span> ${mascota.especie}</p>
+                  ${mascota.raza ? `<p class="bg-white px-3 py-2 rounded-lg inline-block ml-2"><span class="font-bold">🏆 Raza:</span> ${mascota.raza}</p>` : ''}
+                  <p class="bg-white px-3 py-2 rounded-lg"><span class="font-bold">🎂 Edad:</span> ${mascota.edad} ${mascota.edad === 1 ? 'año' : 'años'}</p>
+                  <p class="bg-white px-3 py-2 rounded-lg"><span class="font-bold">👤 Dueño:</span> ${cliente?.nombre || 'Desconocido'}</p>
+                  ${mascota.observaciones ? `<p class="text-xs bg-yellow-100 border-2 border-yellow-300 p-3 rounded-xl mt-2"><span class="font-bold">📝 Observaciones:</span> ${mascota.observaciones}</p>` : ''}
+                </div>
+              </div>
+            </div>
+            <div class="flex gap-2 mt-5">
+              <button
+                onclick="editarMascota('${mascota.id}')"
+                class="flex-1 bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-white px-4 py-3 rounded-xl transition text-sm font-bold shadow-lg"
+              >
+                ✏️ Editar
+              </button>
+              <button
+                onclick="eliminarMascota('${mascota.id}', '${mascota.nombre}')"
+                class="flex-1 bg-gradient-to-r from-red-400 to-rose-500 hover:from-red-500 hover:to-rose-600 text-white px-4 py-3 rounded-xl transition text-sm font-bold shadow-lg"
+              >
+                🗑️ Eliminar
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Cargar clientes en el select del formulario
+    function cargarClientesSelect(filtro: string = '') {
+      const clienteSelect = document.getElementById('clienteId') as HTMLSelectElement;
+      const clientes = storage.getClientes(session!.veterinariaId);
+      
+      const terminoBusqueda = filtro.toLowerCase().trim();
+      const clientesFiltrados = terminoBusqueda 
+        ? clientes.filter(c => 
+            c.nombre.toLowerCase().includes(terminoBusqueda) ||
+            c.telefono.toLowerCase().includes(terminoBusqueda)
+          )
+        : clientes;
+      
+      const valorActual = clienteSelect.value;
+      
+      if (clientesFiltrados.length === 0) {
+        clienteSelect.innerHTML = '<option value="">❌ No se encontraron clientes</option>';
+      } else {
+        clienteSelect.innerHTML = '<option value="">📋 Seleccionar cliente...</option>' +
+          clientesFiltrados.map(c => 
+            `<option value="${c.id}">${c.nombre} - 📞 ${c.telefono}</option>`
+          ).join('');
+      }
+      
+      // Restaurar selección si existe
+      if (valorActual && clientesFiltrados.find(c => c.id === valorActual)) {
+        clienteSelect.value = valorActual;
+      }
+      
+      // Mostrar contador de resultados
+      if (terminoBusqueda) {
+        const label = document.querySelector('label[for="buscarCliente"]') as HTMLElement;
+        if (label) {
+          label.innerHTML = `👤 Dueño (Cliente) * <span class="text-sm bg-purple-200 px-2 py-1 rounded-full ml-2">${clientesFiltrados.length} encontrado${clientesFiltrados.length !== 1 ? 's' : ''}</span>`;
+        }
+      }
+    }
+
+    // Cargar clientes en el filtro
+    function cargarClientesFiltro(filtro: string = '') {
+      const clientes = storage.getClientes(session!.veterinariaId);
+      
+      const terminoBusqueda = filtro.toLowerCase().trim();
+      const clientesFiltrados = terminoBusqueda 
+        ? clientes.filter(c => 
+            c.nombre.toLowerCase().includes(terminoBusqueda) ||
+            c.telefono.toLowerCase().includes(terminoBusqueda)
+          )
+        : clientes;
+      
+      const valorActual = clienteFilter.value;
+      
+      clienteFilter.innerHTML = '<option value="">👥 Todos los clientes</option>' +
+        clientesFiltrados.map(c => 
+          `<option value="${c.id}">${c.nombre} - 📞 ${c.telefono}</option>`
+        ).join('');
+      
+      // Restaurar selección si existe
+      if (valorActual && clientesFiltrados.find(c => c.id === valorActual)) {
+        clienteFilter.value = valorActual;
+      }
+    }
+
+    // Cargar todas las mascotas
+    function cargarMascotas() {
+      const mascotas = storage.getMascotas(session!.veterinariaId);
+      renderMascotas(mascotas);
+    }
+
+    // Filtrar mascotas
+    function filtrarMascotas() {
+      const termino = searchInput.value.trim().toLowerCase();
+      const clienteFiltro = clienteFilter.value;
+      const especieFiltro = especieFilter.value;
+      
+      let mascotas = storage.getMascotas(session!.veterinariaId);
+      const clientes = storage.getClientes(session!.veterinariaId);
+
+      // Mostrar información del cliente si está filtrado
+      const clienteInfo = document.getElementById('clienteInfo');
+      const clienteNombre = document.getElementById('clienteNombre');
+      const clienteContacto = document.getElementById('clienteContacto');
+      
+      if (clienteFiltro && clienteInfo && clienteNombre && clienteContacto) {
+        const cliente = clientes.find(c => c.id === clienteFiltro);
+        if (cliente) {
+          clienteNombre.textContent = cliente.nombre;
+          clienteContacto.textContent = `📞 ${cliente.telefono}${cliente.email ? ` | 📧 ${cliente.email}` : ''}`;
+          clienteInfo.classList.remove('hidden');
+        }
+      } else if (clienteInfo) {
+        clienteInfo.classList.add('hidden');
+      }
+
+      // Filtrar por término de búsqueda
+      if (termino) {
+        mascotas = mascotas.filter(m => {
+          return m.nombre.toLowerCase().includes(termino) ||
+                 m.especie.toLowerCase().includes(termino) ||
+                 m.raza?.toLowerCase().includes(termino);
+        });
+      }
+
+      // Filtrar por cliente
+      if (clienteFiltro) {
+        mascotas = mascotas.filter(m => m.clienteId === clienteFiltro);
+      }
+
+      // Filtrar por especie
+      if (especieFiltro) {
+        mascotas = mascotas.filter(m => m.especie === especieFiltro);
+      }
+
+      renderMascotas(mascotas);
+    }
+
+    // Buscar clientes en tiempo real (modal)
+    const buscarClienteInput = document.getElementById('buscarCliente') as HTMLInputElement;
+    buscarClienteInput.addEventListener('input', () => {
+      const filtro = buscarClienteInput.value;
+      cargarClientesSelect(filtro);
+    });
+
+    // Buscar clientes en tiempo real (filtro principal)
+    const buscarClienteFiltroInput = document.getElementById('buscarClienteFiltro') as HTMLInputElement;
+    buscarClienteFiltroInput.addEventListener('input', () => {
+      const filtro = buscarClienteFiltroInput.value;
+      cargarClientesFiltro(filtro);
+    });
+
+    // Mostrar información del cliente seleccionado
+    const clienteSelect = document.getElementById('clienteId') as HTMLSelectElement;
+    clienteSelect.addEventListener('change', () => {
+      const clienteSeleccionadoInfo = document.getElementById('clienteSeleccionadoInfo')!;
+      const nombreClienteSeleccionado = document.getElementById('nombreClienteSeleccionado')!;
+      const infoClienteSeleccionado = document.getElementById('infoClienteSeleccionado')!;
+      
+      if (clienteSelect.value) {
+        const clientes = storage.getClientes(session!.veterinariaId);
+        const cliente = clientes.find(c => c.id === clienteSelect.value);
+        if (cliente) {
+          nombreClienteSeleccionado.textContent = cliente.nombre;
+          infoClienteSeleccionado.textContent = `📞 ${cliente.telefono}${cliente.email ? ` | 📧 ${cliente.email}` : ''}`;
+          clienteSeleccionadoInfo.classList.remove('hidden');
+        }
+      } else {
+        clienteSeleccionadoInfo.classList.add('hidden');
+      }
+    });
+
+    // Abrir modal para nueva mascota
+    document.getElementById('btnNuevaMascota')!.addEventListener('click', () => {
+      editandoId = null;
+      mascotaForm.reset();
+      buscarClienteInput.value = '';
+      (document.getElementById('modalTitle') as HTMLElement).textContent = 'Nueva Mascota';
+      cargarClientesSelect();
+      document.getElementById('clienteSeleccionadoInfo')!.classList.add('hidden');
+      // Restaurar label original
+      const label = document.querySelector('label[for="buscarCliente"]') as HTMLElement;
+      if (label) {
+        label.innerHTML = '👤 Dueño (Cliente) *';
+      }
+      modal.classList.remove('hidden');
+    });
+
+    // Cerrar modal
+    function cerrarModal() {
+      modal.classList.add('hidden');
+      mascotaForm.reset();
+      editandoId = null;
+      buscarClienteInput.value = '';
+      cargarClientesSelect();
+      document.getElementById('clienteSeleccionadoInfo')!.classList.add('hidden');
+      // Restaurar label original
+      const label = document.querySelector('label[for="buscarCliente"]') as HTMLElement;
+      if (label && label.innerHTML !== '👤 Dueño (Cliente) *') {
+        label.innerHTML = '👤 Dueño (Cliente) *';
+      }
+    }
+
+    document.getElementById('btnCerrarModal')!.addEventListener('click', cerrarModal);
+    document.getElementById('btnCancelar')!.addEventListener('click', cerrarModal);
+
+    // Guardar mascota
+    mascotaForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const nombre = (document.getElementById('nombre') as HTMLInputElement).value;
+      const especie = (document.getElementById('especie') as HTMLSelectElement).value;
+      const raza = (document.getElementById('raza') as HTMLInputElement).value;
+      const edad = parseInt((document.getElementById('edad') as HTMLInputElement).value);
+      const clienteId = (document.getElementById('clienteId') as HTMLSelectElement).value;
+      const observaciones = (document.getElementById('observaciones') as HTMLTextAreaElement).value;
+
+      if (editandoId) {
+        // Actualizar mascota existente
+        storage.updateMascota(editandoId, {
+          nombre,
+          especie,
+          raza,
+          edad,
+          clienteId,
+          observaciones
+        });
+      } else {
+        // Crear nueva mascota
+        const nuevaMascota: Mascota = {
+          id: `mas-${Date.now()}`,
+          nombre,
+          especie,
+          raza,
+          edad,
+          clienteId,
+          veterinariaId: session!.veterinariaId,
+          observaciones
+        };
+        storage.saveMascota(nuevaMascota);
+      }
+
+      cerrarModal();
+      cargarMascotas();
+    });
+
+    // Editar mascota
+    (window as any).editarMascota = (id: string) => {
+      const mascotas = storage.getMascotas(session!.veterinariaId);
+      const mascota = mascotas.find(m => m.id === id);
+      
+      if (mascota) {
+        editandoId = id;
+        buscarClienteInput.value = '';
+        cargarClientesSelect();
+        (document.getElementById('nombre') as HTMLInputElement).value = mascota.nombre;
+        (document.getElementById('especie') as HTMLSelectElement).value = mascota.especie;
+        (document.getElementById('raza') as HTMLInputElement).value = mascota.raza || '';
+        (document.getElementById('edad') as HTMLInputElement).value = mascota.edad.toString();
+        (document.getElementById('clienteId') as HTMLSelectElement).value = mascota.clienteId;
+        (document.getElementById('observaciones') as HTMLTextAreaElement).value = mascota.observaciones || '';
+        (document.getElementById('modalTitle') as HTMLElement).textContent = 'Editar Mascota';
+        
+        // Mostrar información del cliente seleccionado
+        const clientes = storage.getClientes(session!.veterinariaId);
+        const cliente = clientes.find(c => c.id === mascota.clienteId);
+        if (cliente) {
+          const clienteSeleccionadoInfo = document.getElementById('clienteSeleccionadoInfo')!;
+          const nombreClienteSeleccionado = document.getElementById('nombreClienteSeleccionado')!;
+          const infoClienteSeleccionado = document.getElementById('infoClienteSeleccionado')!;
+          nombreClienteSeleccionado.textContent = cliente.nombre;
+          infoClienteSeleccionado.textContent = `📞 ${cliente.telefono}${cliente.email ? ` | 📧 ${cliente.email}` : ''}`;
+          clienteSeleccionadoInfo.classList.remove('hidden');
+        }
+        
+        modal.classList.remove('hidden');
+      }
+    };
+
+    // Eliminar mascota
+    (window as any).eliminarMascota = (id: string, nombre: string) => {
+      if (confirm(`¿Estás seguro de eliminar a "${nombre}"?`)) {
+        storage.deleteMascota(id);
+        cargarMascotas();
+      }
+    };
+
+    // Eventos de búsqueda y filtros
+    searchInput.addEventListener('input', filtrarMascotas);
+    clienteFilter.addEventListener('change', filtrarMascotas);
+    especieFilter.addEventListener('change', filtrarMascotas);
+
+    document.getElementById('btnVerTodas')!.addEventListener('click', () => {
+      searchInput.value = '';
+      clienteFilter.value = '';
+      especieFilter.value = '';
+      cargarMascotas();
+    });
+
+    // Cargar datos al iniciar
+    cargarClientesFiltro();
+    cargarMascotas();
+  </script>
+</DashboardLayout>
