@@ -1,0 +1,657 @@
+---
+import DashboardLayout from '../layouts/DashboardLayout.astro';
+---
+
+<DashboardLayout title="Generar PDF - Documentación de Citas">
+  <div class="space-y-6">
+    <!-- Encabezado -->
+    <div class="bg-gradient-to-r from-purple-100 via-pink-100 to-red-100 p-8 rounded-3xl shadow-xl border-4 border-purple-200">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">📄 Generador de PDF</h2>
+          <p class="text-purple-600 mt-2 text-lg">✨ Documenta la funcionalidad de citas del sistema</p>
+        </div>
+        <button
+          id="btnGenerarPDF"
+          class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-4 px-8 rounded-2xl transition transform hover:scale-105 shadow-lg"
+        >
+          📥 Generar PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Opciones del PDF -->
+    <div class="bg-white p-8 rounded-3xl shadow-xl border-4 border-purple-200">
+      <h3 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-6">⚙️ Opciones del Documento</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-2xl border-2 border-purple-200">
+          <h4 class="font-bold text-purple-700 mb-4 text-lg">📋 Contenido a Incluir</h4>
+          <div class="space-y-3">
+            <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded-lg transition">
+              <input type="checkbox" id="incluirIntroduccion" checked class="w-5 h-5 text-purple-600 rounded">
+              <span class="text-gray-700">Introducción al Sistema de Citas</span>
+            </label>
+            <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded-lg transition">
+              <input type="checkbox" id="incluirCaracteristicas" checked class="w-5 h-5 text-purple-600 rounded">
+              <span class="text-gray-700">Características Principales</span>
+            </label>
+            <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded-lg transition">
+              <input type="checkbox" id="incluirFlujos" checked class="w-5 h-5 text-purple-600 rounded">
+              <span class="text-gray-700">Flujos de Trabajo</span>
+            </label>
+            <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded-lg transition">
+              <input type="checkbox" id="incluirCapturas" checked class="w-5 h-5 text-purple-600 rounded">
+              <span class="text-gray-700">Capturas de Pantalla Simuladas</span>
+            </label>
+            <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded-lg transition">
+              <input type="checkbox" id="incluirEstadisticas" checked class="w-5 h-5 text-purple-600 rounded">
+              <span class="text-gray-700">Estadísticas Actuales</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl border-2 border-blue-200">
+          <h4 class="font-bold text-blue-700 mb-4 text-lg">🎨 Personalización</h4>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-blue-700 font-semibold mb-2">Título del Documento</label>
+              <input
+                type="text"
+                id="tituloPDF"
+                value="Sistema de Gestión de Citas Veterinarias"
+                class="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:ring-4 focus:ring-blue-300 outline-none"
+              />
+            </div>
+            <div>
+              <label class="block text-blue-700 font-semibold mb-2">Nombre de la Veterinaria</label>
+              <input
+                type="text"
+                id="nombreVeterinaria"
+                placeholder="Mi Veterinaria"
+                class="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:ring-4 focus:ring-blue-300 outline-none"
+              />
+            </div>
+            <div>
+              <label class="block text-blue-700 font-semibold mb-2">Autor del Documento</label>
+              <input
+                type="text"
+                id="autorPDF"
+                placeholder="Nombre del Autor"
+                class="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:ring-4 focus:ring-blue-300 outline-none"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vista Previa -->
+    <div class="bg-white p-8 rounded-3xl shadow-xl border-4 border-blue-200">
+      <h3 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">👁️ Vista Previa del Contenido</h3>
+      <div id="vistaPrevia" class="prose max-w-none">
+        <p class="text-gray-600">El PDF incluirá:</p>
+        <ul class="list-disc list-inside text-gray-700 space-y-2 mt-4">
+          <li>Portada con logo y título personalizado</li>
+          <li>Índice de contenidos</li>
+          <li>Introducción al sistema de gestión de citas</li>
+          <li>Lista de características implementadas</li>
+          <li>Flujos de trabajo detallados (Crear, Confirmar, Cancelar citas)</li>
+          <li>Capturas de pantalla simuladas de las interfaces</li>
+          <li>Estadísticas del sistema actual</li>
+          <li>Conclusiones y próximos pasos</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Estado de Generación -->
+    <div id="estadoGeneracion" class="hidden bg-gradient-to-r from-green-100 to-emerald-100 p-6 rounded-3xl shadow-xl border-4 border-green-200">
+      <div class="text-center">
+        <div class="text-6xl mb-4">✅</div>
+        <h3 class="text-2xl font-bold text-green-700 mb-2">¡PDF Generado Exitosamente!</h3>
+        <p class="text-gray-600">El documento se ha descargado automáticamente.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { storage } from '../lib/storage';
+    import { Auth } from '../lib/auth';
+    import { jsPDF } from 'jspdf';
+    import 'jspdf-autotable';
+
+    storage.init();
+
+    const session = Auth.getSession();
+    if (!session) {
+      window.location.href = '/';
+    }
+
+    const btnGenerarPDF = document.getElementById('btnGenerarPDF')!;
+    const estadoGeneracion = document.getElementById('estadoGeneracion')!;
+
+    // Función para generar el PDF
+    btnGenerarPDF.addEventListener('click', () => {
+      generarPDF();
+    });
+
+    function generarPDF() {
+      // Obtener opciones
+      const incluirIntroduccion = (document.getElementById('incluirIntroduccion') as HTMLInputElement).checked;
+      const incluirCaracteristicas = (document.getElementById('incluirCaracteristicas') as HTMLInputElement).checked;
+      const incluirFlujos = (document.getElementById('incluirFlujos') as HTMLInputElement).checked;
+      const incluirCapturas = (document.getElementById('incluirCapturas') as HTMLInputElement).checked;
+      const incluirEstadisticas = (document.getElementById('incluirEstadisticas') as HTMLInputElement).checked;
+      
+      const tituloPDF = (document.getElementById('tituloPDF') as HTMLInputElement).value || 'Sistema de Gestión de Citas';
+      const nombreVeterinaria = (document.getElementById('nombreVeterinaria') as HTMLInputElement).value || session!.veterinariaId;
+      const autorPDF = (document.getElementById('autorPDF') as HTMLInputElement).value || 'Sistema Veterinario';
+
+      // Crear nuevo PDF
+      const doc = new jsPDF();
+      let yPos = 20;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 20;
+      const maxWidth = pageWidth - (margin * 2);
+
+      // Función auxiliar para agregar nueva página si es necesario
+      function checkAddPage(neededSpace: number = 20) {
+        if (yPos + neededSpace > pageHeight - margin) {
+          doc.addPage();
+          yPos = margin;
+          return true;
+        }
+        return false;
+      }
+
+      // PORTADA
+      doc.setFillColor(99, 102, 241); // Indigo
+      doc.rect(0, 0, pageWidth, pageHeight, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(32);
+      doc.setFont('helvetica', 'bold');
+      const titulo = doc.splitTextToSize(tituloPDF, maxWidth - 20);
+      doc.text(titulo, pageWidth / 2, 80, { align: 'center' });
+      
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Documentación Técnica', pageWidth / 2, 110, { align: 'center' });
+      
+      doc.setFontSize(16);
+      doc.text(nombreVeterinaria, pageWidth / 2, 140, { align: 'center' });
+      
+      doc.setFontSize(12);
+      const fecha = new Date().toLocaleDateString('es-MX', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      doc.text(fecha, pageWidth / 2, pageHeight - 40, { align: 'center' });
+      doc.text(`Por: ${autorPDF}`, pageWidth / 2, pageHeight - 30, { align: 'center' });
+
+      // Nueva página para contenido
+      doc.addPage();
+      yPos = margin;
+      doc.setTextColor(0, 0, 0);
+
+      // ÍNDICE
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(79, 70, 229); // Indigo
+      doc.text('📋 Índice de Contenidos', margin, yPos);
+      yPos += 15;
+
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(0, 0, 0);
+      const indiceItems = [
+        '1. Introducción',
+        '2. Características Principales',
+        '3. Flujos de Trabajo',
+        '4. Interfaces del Sistema',
+        '5. Estadísticas Actuales',
+        '6. Conclusiones'
+      ];
+      indiceItems.forEach(item => {
+        doc.text(item, margin + 10, yPos);
+        yPos += 8;
+      });
+
+      // INTRODUCCIÓN
+      if (incluirIntroduccion) {
+        doc.addPage();
+        yPos = margin;
+        
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(79, 70, 229);
+        doc.text('1. Introducción al Sistema de Citas', margin, yPos);
+        yPos += 15;
+
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        
+        const introTexto = [
+          'El Sistema de Gestión de Citas Veterinarias es una solución integral diseñada para facilitar',
+          'la programación, confirmación y seguimiento de citas entre veterinarias y clientes.',
+          '',
+          'Este sistema permite:',
+          '• Crear y gestionar citas de manera eficiente',
+          '• Enviar enlaces de confirmación a los clientes',
+          '• Filtrar y buscar citas por múltiples criterios',
+          '• Realizar seguimiento del estado de cada cita',
+          '• Mantener un registro completo de todas las consultas',
+          '',
+          'La implementación está basada en tecnologías web modernas como Astro, TypeScript',
+          'y Tailwind CSS, garantizando una experiencia de usuario fluida y profesional.'
+        ];
+
+        introTexto.forEach(linea => {
+          checkAddPage();
+          doc.text(linea, margin, yPos);
+          yPos += 7;
+        });
+      }
+
+      // CARACTERÍSTICAS
+      if (incluirCaracteristicas) {
+        checkAddPage(60);
+        yPos += 10;
+        
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(79, 70, 229);
+        doc.text('2. Características Principales', margin, yPos);
+        yPos += 15;
+
+        const caracteristicas = [
+          {
+            titulo: '📅 Gestión Completa de Citas',
+            items: [
+              'Crear nuevas citas con información detallada',
+              'Editar citas existentes',
+              'Eliminar citas con confirmación',
+              'Asignar estados: Pendiente, Confirmada, Completada, Cancelada'
+            ]
+          },
+          {
+            titulo: '🔍 Búsqueda y Filtros Avanzados',
+            items: [
+              'Filtrar por fecha específica',
+              'Filtrar por estado de la cita',
+              'Búsqueda por nombre de cliente o mascota',
+              'Ver todas las citas o aplicar múltiples filtros'
+            ]
+          },
+          {
+            titulo: '🔗 Sistema de Confirmación',
+            items: [
+              'Generación automática de enlaces únicos de confirmación',
+              'Página dedicada para que clientes confirmen o cancelen',
+              'Actualización automática del estado de la cita',
+              'Token de seguridad único para cada cita'
+            ]
+          },
+          {
+            titulo: '👥 Integración con Clientes y Mascotas',
+            items: [
+              'Selección inteligente de clientes',
+              'Carga automática de mascotas por cliente',
+              'Visualización de información completa',
+              'Validación de datos en cada paso'
+            ]
+          }
+        ];
+
+        caracteristicas.forEach(categoria => {
+          checkAddPage(40);
+          
+          doc.setFontSize(14);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(59, 130, 246); // Blue
+          doc.text(categoria.titulo, margin, yPos);
+          yPos += 8;
+
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(0, 0, 0);
+          
+          categoria.items.forEach(item => {
+            checkAddPage();
+            doc.text(`  • ${item}`, margin + 5, yPos);
+            yPos += 6;
+          });
+          yPos += 5;
+        });
+      }
+
+      // FLUJOS DE TRABAJO
+      if (incluirFlujos) {
+        doc.addPage();
+        yPos = margin;
+        
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(79, 70, 229);
+        doc.text('3. Flujos de Trabajo', margin, yPos);
+        yPos += 15;
+
+        // Flujo 1: Crear Cita
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(16, 185, 129); // Green
+        doc.text('3.1 Flujo de Creación de Cita', margin, yPos);
+        yPos += 10;
+
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+
+        const flujoCreacion = [
+          '1. Usuario hace clic en "Nueva Cita"',
+          '2. Se abre modal con formulario de tres pasos:',
+          '   ➜ Paso 1: Buscar y seleccionar cliente',
+          '   ➜ Paso 2: Seleccionar mascota del cliente',
+          '   ➜ Paso 3: Ingresar detalles de la cita (fecha, hora, motivo)',
+          '3. Sistema valida todos los campos requeridos',
+          '4. Al guardar, se genera un token único de confirmación',
+          '5. Se muestra modal con enlace para compartir con el cliente',
+          '6. La cita queda guardada con estado "Pendiente"',
+          '7. Usuario puede copiar el enlace y enviarlo por WhatsApp, email, etc.'
+        ];
+
+        flujoCreacion.forEach(paso => {
+          checkAddPage();
+          doc.text(paso, margin + 5, yPos);
+          yPos += 6;
+        });
+
+        yPos += 10;
+
+        // Flujo 2: Confirmar Cita
+        checkAddPage(40);
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(59, 130, 246); // Blue
+        doc.text('3.2 Flujo de Confirmación por Cliente', margin, yPos);
+        yPos += 10;
+
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+
+        const flujoConfirmacion = [
+          '1. Cliente recibe enlace de confirmación',
+          '2. Al abrir el enlace, ve página con detalles de su cita:',
+          '   • Nombre del cliente',
+          '   • Mascota y especie',
+          '   • Fecha y hora',
+          '   • Motivo de la consulta',
+          '   • Estado actual',
+          '3. Cliente puede elegir:',
+          '   ✅ "Confirmar mi Asistencia" - Cambia estado a "Confirmada"',
+          '   ❌ "No Podré Asistir" - Cambia estado a "Cancelada"',
+          '4. Sistema actualiza el estado automáticamente',
+          '5. Se muestra mensaje de confirmación al cliente',
+          '6. Veterinaria ve el cambio de estado en tiempo real'
+        ];
+
+        flujoConfirmacion.forEach(paso => {
+          checkAddPage();
+          doc.text(paso, margin + 5, yPos);
+          yPos += 6;
+        });
+      }
+
+      // CAPTURAS SIMULADAS
+      if (incluirCapturas) {
+        doc.addPage();
+        yPos = margin;
+        
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(79, 70, 229);
+        doc.text('4. Interfaces del Sistema', margin, yPos);
+        yPos += 15;
+
+        // Descripción de interfaces
+        const interfaces = [
+          {
+            titulo: '🖥️ Pantalla Principal de Gestión de Citas',
+            descripcion: [
+              'Encabezado con gradiente azul-púrpura',
+              'Botón "Nueva Cita" destacado en la esquina superior derecha',
+              'Panel de filtros con:',
+              '  - Selector de fecha',
+              '  - Dropdown de estados',
+              '  - Campo de búsqueda por texto',
+              '  - Botón "Ver Todas"',
+              'Lista de citas con tarjetas coloridas según estado:',
+              '  - Amarillo-Naranja: Pendiente',
+              '  - Verde-Esmeralda: Confirmada',
+              '  - Azul-Cyan: Completada',
+              '  - Rojo-Rosa: Cancelada',
+              'Cada tarjeta muestra información completa y botones de acción'
+            ]
+          },
+          {
+            titulo: '📝 Modal de Creación/Edición de Cita',
+            descripcion: [
+              'Diseño en tres secciones con colores distintivos:',
+              '',
+              '1. Sección Azul - Selección de Cliente:',
+              '   • Campo de búsqueda en tiempo real',
+              '   • Dropdown con resultados filtrados',
+              '   • Panel informativo con datos del cliente seleccionado',
+              '',
+              '2. Sección Púrpura - Selección de Mascota:',
+              '   • Dropdown habilitado solo tras seleccionar cliente',
+              '   • Muestra mascotas asociadas al cliente',
+              '   • Panel con detalles de la mascota',
+              '',
+              '3. Sección Índigo - Detalles de la Cita:',
+              '   • Campos de fecha y hora',
+              '   • Campo de motivo de consulta',
+              '   • Selector de estado',
+              '   • Área de observaciones',
+              '',
+              'Botones finales: "Guardar Cita" y "Cancelar"'
+            ]
+          },
+          {
+            titulo: '🔗 Modal de Enlace de Confirmación',
+            descripcion: [
+              'Aparece tras crear una cita exitosamente',
+              'Incluye:',
+              '  • Icono de éxito ✅',
+              '  • Mensaje de confirmación',
+              '  • Campo con URL completa de confirmación',
+              '  • Botón "Copiar" para copiar al portapapeles',
+              '  • Panel de instrucciones para compartir el enlace',
+              '  • Resumen de los detalles de la cita creada',
+              '  • Botón "Entendido" para cerrar'
+            ]
+          },
+          {
+            titulo: '📱 Página de Confirmación del Cliente',
+            descripcion: [
+              'Diseño limpio y centrado',
+              'Fondo con gradiente suave',
+              'Muestra todos los detalles de la cita',
+              'Dos botones grandes de acción:',
+              '  • Verde: "Confirmar mi Asistencia"',
+              '  • Rojo: "No Podré Asistir"',
+              'Panel de información de contacto de la veterinaria',
+              'Mensajes de confirmación/cancelación tras la acción',
+              'Manejo de estados (cita ya confirmada, cancelada, completada)'
+            ]
+          }
+        ];
+
+        interfaces.forEach(interfaz => {
+          checkAddPage(50);
+          
+          doc.setFontSize(14);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(139, 92, 246); // Purple
+          doc.text(interfaz.titulo, margin, yPos);
+          yPos += 10;
+
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(0, 0, 0);
+          
+          interfaz.descripcion.forEach(linea => {
+            checkAddPage();
+            doc.text(linea, margin + 5, yPos);
+            yPos += 5;
+          });
+          yPos += 8;
+        });
+      }
+
+      // ESTADÍSTICAS
+      if (incluirEstadisticas) {
+        doc.addPage();
+        yPos = margin;
+        
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(79, 70, 229);
+        doc.text('5. Estadísticas del Sistema Actual', margin, yPos);
+        yPos += 15;
+
+        // Obtener datos reales del sistema
+        const citas = storage.getCitas(session!.veterinariaId);
+        const clientes = storage.getClientes(session!.veterinariaId);
+        const mascotas = storage.getMascotas(session!.veterinariaId);
+
+        const estadoPendiente = citas.filter(c => c.estado === 'Pendiente').length;
+        const estadoConfirmada = citas.filter(c => c.estado === 'Confirmada').length;
+        const estadoCompletada = citas.filter(c => c.estado === 'Completada').length;
+        const estadoCancelada = citas.filter(c => c.estado === 'Cancelada').length;
+
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+
+        const estadisticas = [
+          `Total de Citas Registradas: ${citas.length}`,
+          `Total de Clientes: ${clientes.length}`,
+          `Total de Mascotas: ${mascotas.length}`,
+          '',
+          'Distribución por Estado:',
+          `  ⏳ Pendientes: ${estadoPendiente} (${((estadoPendiente/citas.length)*100).toFixed(1)}%)`,
+          `  ✅ Confirmadas: ${estadoConfirmada} (${((estadoConfirmada/citas.length)*100).toFixed(1)}%)`,
+          `  ✔️ Completadas: ${estadoCompletada} (${((estadoCompletada/citas.length)*100).toFixed(1)}%)`,
+          `  ❌ Canceladas: ${estadoCancelada} (${((estadoCancelada/citas.length)*100).toFixed(1)}%)`
+        ];
+
+        estadisticas.forEach(linea => {
+          doc.text(linea, margin + 5, yPos);
+          yPos += 8;
+        });
+
+        yPos += 10;
+
+        // Tabla de citas recientes si hay datos
+        if (citas.length > 0) {
+          checkAddPage(60);
+          
+          doc.setFontSize(14);
+          doc.setFont('helvetica', 'bold');
+          doc.text('📊 Citas Recientes', margin, yPos);
+          yPos += 10;
+
+          const citasRecientes = citas.slice(0, 10).map(cita => {
+            const cliente = clientes.find(c => c.id === cita.clienteId);
+            const mascota = mascotas.find(m => m.id === cita.mascotaId);
+            return [
+              cita.fecha,
+              cita.hora,
+              cliente?.nombre || 'N/A',
+              mascota?.nombre || 'N/A',
+              cita.motivo.substring(0, 30) + (cita.motivo.length > 30 ? '...' : ''),
+              cita.estado
+            ];
+          });
+
+          (doc as any).autoTable({
+            head: [['Fecha', 'Hora', 'Cliente', 'Mascota', 'Motivo', 'Estado']],
+            body: citasRecientes,
+            startY: yPos,
+            theme: 'striped',
+            headStyles: { fillColor: [79, 70, 229] },
+            margin: { left: margin, right: margin },
+            styles: { fontSize: 9 }
+          });
+        }
+      }
+
+      // CONCLUSIONES
+      doc.addPage();
+      yPos = margin;
+      
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(79, 70, 229);
+      doc.text('6. Conclusiones', margin, yPos);
+      yPos += 15;
+
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(0, 0, 0);
+
+      const conclusiones = [
+        'El Sistema de Gestión de Citas Veterinarias ofrece una solución completa y moderna',
+        'para la administración de citas en clínicas veterinarias.',
+        '',
+        'Ventajas principales:',
+        '✓ Interfaz intuitiva y fácil de usar',
+        '✓ Proceso de confirmación automatizado',
+        '✓ Filtros avanzados para búsqueda rápida',
+        '✓ Diseño responsive adaptable a cualquier dispositivo',
+        '✓ Almacenamiento local para funcionamiento sin servidor',
+        '✓ Tokens únicos de seguridad para cada cita',
+        '',
+        'Próximas mejoras sugeridas:',
+        '• Notificaciones automáticas por email/SMS',
+        '• Recordatorios programados antes de las citas',
+        '• Calendario visual mensual/semanal',
+        '• Reportes y estadísticas avanzadas',
+        '• Exportación de datos a Excel/PDF',
+        '• Integración con sistemas de pago',
+        '',
+        'Este sistema proporciona las bases sólidas para una gestión eficiente de citas,',
+        'mejorando la experiencia tanto del personal veterinario como de los clientes.'
+      ];
+
+      conclusiones.forEach(linea => {
+        checkAddPage();
+        doc.text(linea, margin, yPos);
+        yPos += 7;
+      });
+
+      // Pie de página en última página
+      yPos = pageHeight - 30;
+      doc.setFontSize(10);
+      doc.setTextColor(128, 128, 128);
+      doc.setFont('helvetica', 'italic');
+      doc.text(`Generado el ${fecha}`, pageWidth / 2, yPos, { align: 'center' });
+      doc.text(`${nombreVeterinaria} - ${autorPDF}`, pageWidth / 2, yPos + 6, { align: 'center' });
+
+      // Guardar PDF
+      const nombreArchivo = `Documentacion_Citas_${new Date().getTime()}.pdf`;
+      doc.save(nombreArchivo);
+
+      // Mostrar mensaje de éxito
+      estadoGeneracion.classList.remove('hidden');
+      setTimeout(() => {
+        estadoGeneracion.classList.add('hidden');
+      }, 5000);
+    }
+  </script>
+</DashboardLayout>

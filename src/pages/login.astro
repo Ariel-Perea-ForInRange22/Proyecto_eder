@@ -77,7 +77,12 @@ import Layout from '../layouts/Layout.astro';
       const usuario = Auth.login(username, password);
 
       if (usuario) {
-        window.location.href = '/dashboard';
+        // Redirigir según el rol
+        if (usuario.rol === 'cliente') {
+          window.location.href = '/mi-cuenta';
+        } else {
+          window.location.href = '/dashboard';
+        }
       } else {
         errorMsg.textContent = 'Usuario o contraseña incorrectos';
         errorMsg.classList.remove('hidden');

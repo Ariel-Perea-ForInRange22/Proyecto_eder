@@ -5,8 +5,10 @@ export interface Usuario {
   password: string;
   nombre: string;
   telefono: string;
-  rol: 'admin' | 'veterinario';
+  email?: string;
+  rol: 'admin' | 'veterinario' | 'cliente';
   veterinariaId: string;
+  clienteId?: string; // ID del cliente asociado para rol 'cliente'
 }
 
 export interface Veterinaria {
@@ -46,4 +48,21 @@ export interface Producto {
   categoria: 'Alimento' | 'Higiene' | 'Juguetes' | 'Medicamentos' | 'Accesorios' | 'Otro';
   especiesRecomendadas: string[]; // ['Perro', 'Gato', 'Ave', etc.] - vacío significa para todas
   veterinariaId: string;
+}
+
+export interface Cita {
+  id: string;
+  clienteId: string;
+  mascotaId: string;
+  veterinarioId: string;
+  veterinariaId: string;
+  fecha: string; // ISO string
+  hora: string; // HH:MM
+  motivo: string;
+  estado: 'Pendiente' | 'Confirmada' | 'Completada' | 'Cancelada';
+  observaciones: string;
+  fechaCreacion: string;
+  tokenConfirmacion: string; // Token único para confirmar la cita
+  confirmadaPor?: string; // IP o identificador del cliente que confirmó
+  fechaConfirmacion?: string; // Fecha en que se confirmó
 }

@@ -1,0 +1,747 @@
+---
+import DashboardLayout from '../layouts/DashboardLayout.astro';
+---
+
+<DashboardLayout title="Citas">
+  <div class="space-y-6">
+    <!-- Encabezado -->
+    <div class="bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 p-8 rounded-3xl shadow-xl border-4 border-blue-200">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">📅 Gestión de Citas</h2>
+          <p class="text-blue-600 mt-2 text-lg">✨ Programa y administra las citas veterinarias</p>
+        </div>
+        <button
+          id="btnNuevaCita"
+          class="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-bold py-4 px-8 rounded-2xl transition transform hover:scale-105 shadow-lg"
+        >
+          ➕ Nueva Cita
+        </button>
+      </div>
+    </div>
+
+    <!-- Filtros de Búsqueda -->
+    <div class="bg-white p-6 rounded-3xl shadow-xl border-4 border-purple-200">
+      <div class="mb-3 flex items-center gap-2 text-blue-600">
+        <span class="font-bold">🔍 Filtros de Búsqueda</span>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+        <div class="md:col-span-3">
+          <input
+            type="date"
+            id="fechaFilter"
+            class="w-full px-6 py-4 border-2 border-blue-200 rounded-2xl focus:ring-4 focus:ring-blue-300 focus:border-blue-400 outline-none text-lg bg-gradient-to-r from-blue-50 to-indigo-50"
+          />
+        </div>
+        <div class="md:col-span-3">
+          <select
+            id="estadoFilter"
+            class="w-full px-6 py-4 border-2 border-purple-200 rounded-2xl focus:ring-4 focus:ring-purple-300 outline-none bg-gradient-to-r from-purple-50 to-pink-50 font-medium text-purple-700"
+          >
+            <option value="">📊 Todos los estados</option>
+            <option value="Pendiente">⏳ Pendiente</option>
+            <option value="Confirmada">✅ Confirmada</option>
+            <option value="Completada">✔️ Completada</option>
+            <option value="Cancelada">❌ Cancelada</option>
+          </select>
+        </div>
+        <div class="md:col-span-4">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="🔍 Buscar por cliente o mascota..."
+            class="w-full px-6 py-4 border-2 border-indigo-200 rounded-2xl focus:ring-4 focus:ring-indigo-300 focus:border-indigo-400 outline-none text-lg"
+          />
+        </div>
+        <div class="md:col-span-2">
+          <button
+            id="btnVerTodas"
+            class="w-full bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-bold px-6 py-4 rounded-2xl transition shadow-lg"
+          >
+            📊 Ver Todas
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de Citas -->
+    <div class="bg-white p-8 rounded-3xl shadow-xl border-4 border-blue-200">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">📋 Lista de Citas</h3>
+        <div id="countCitas" class="text-lg font-bold text-blue-600 bg-blue-100 px-4 py-2 rounded-xl"></div>
+      </div>
+      
+      <div id="citasList" class="space-y-4">
+        <!-- Las citas se cargarán aquí -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Crear/Editar Cita -->
+  <div id="citaModal" class="hidden fixed inset-0 flex items-center justify-center z-50" style="backdrop-filter: blur(10px); background-color: rgba(0, 0, 0, 0.2);">
+    <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto border-4 border-blue-300">
+      <div class="flex justify-between items-center mb-6">
+        <h3 id="modalTitle" class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">📅 Nueva Cita</h3>
+        <button id="btnCerrarModal" class="text-blue-500 hover:text-blue-700 text-3xl font-bold">✕</button>
+      </div>
+
+      <form id="citaForm" class="space-y-4">
+        <input type="hidden" id="citaId" />
+        
+        <!-- Búsqueda de Cliente -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-2xl border-2 border-blue-200">
+          <h4 class="font-bold text-blue-700 mb-3 text-lg">👤 Paso 1: Seleccionar Cliente</h4>
+          <div class="space-y-3">
+            <input
+              type="text"
+              id="buscarCliente"
+              placeholder="🔍 Buscar cliente por nombre o teléfono..."
+              class="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:ring-4 focus:ring-blue-300 focus:border-blue-400 outline-none bg-white"
+            />
+            <select
+              id="clienteId"
+              required
+              class="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:ring-4 focus:ring-blue-300 focus:border-blue-400 outline-none bg-white"
+            >
+              <option value="">Seleccionar cliente...</option>
+            </select>
+            <div id="clienteInfo" class="hidden bg-white p-3 rounded-xl border-2 border-green-300">
+              <p class="text-sm font-semibold text-green-700">✅ Cliente: <span id="clienteNombre"></span></p>
+              <p class="text-xs text-green-600 mt-1" id="clienteContacto"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Selección de Mascota -->
+        <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-5 rounded-2xl border-2 border-purple-200">
+          <h4 class="font-bold text-purple-700 mb-3 text-lg">🐾 Paso 2: Seleccionar Mascota</h4>
+          <select
+            id="mascotaId"
+            required
+            disabled
+            class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 outline-none bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+          >
+            <option value="">Primero selecciona un cliente...</option>
+          </select>
+          <div id="mascotaInfo" class="hidden mt-3 bg-white p-3 rounded-xl border-2 border-green-300">
+            <p class="text-sm font-semibold text-green-700">✅ Mascota: <span id="mascotaNombre"></span></p>
+            <p class="text-xs text-green-600 mt-1" id="mascotaDetalles"></p>
+          </div>
+        </div>
+
+        <!-- Detalles de la Cita -->
+        <div class="bg-gradient-to-r from-indigo-50 to-blue-50 p-5 rounded-2xl border-2 border-indigo-200">
+          <h4 class="font-bold text-indigo-700 mb-3 text-lg">📋 Paso 3: Detalles de la Cita</h4>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-indigo-700 font-bold mb-2">📆 Fecha *</label>
+              <input
+                type="date"
+                id="fecha"
+                required
+                class="w-full px-4 py-3 border-2 border-indigo-200 rounded-xl focus:ring-4 focus:ring-indigo-300 focus:border-indigo-400 outline-none"
+              />
+            </div>
+            <div>
+              <label class="block text-indigo-700 font-bold mb-2">⏰ Hora *</label>
+              <input
+                type="time"
+                id="hora"
+                required
+                class="w-full px-4 py-3 border-2 border-indigo-200 rounded-xl focus:ring-4 focus:ring-indigo-300 focus:border-indigo-400 outline-none"
+              />
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <label class="block text-indigo-700 font-bold mb-2">📝 Motivo de la Consulta *</label>
+            <input
+              type="text"
+              id="motivo"
+              required
+              placeholder="Ej: Consulta general, Vacunación, Control, Emergencia..."
+              class="w-full px-4 py-3 border-2 border-indigo-200 rounded-xl focus:ring-4 focus:ring-indigo-300 focus:border-indigo-400 outline-none"
+            />
+          </div>
+
+          <div class="mt-4">
+            <label class="block text-indigo-700 font-bold mb-2">📊 Estado</label>
+            <select
+              id="estado"
+              class="w-full px-4 py-3 border-2 border-indigo-200 rounded-xl focus:ring-4 focus:ring-indigo-300 focus:border-indigo-400 outline-none bg-white"
+            >
+              <option value="Pendiente">⏳ Pendiente</option>
+              <option value="Confirmada">✅ Confirmada</option>
+              <option value="Completada">✔️ Completada</option>
+              <option value="Cancelada">❌ Cancelada</option>
+            </select>
+          </div>
+
+          <div class="mt-4">
+            <label class="block text-indigo-700 font-bold mb-2">💬 Observaciones</label>
+            <textarea
+              id="observaciones"
+              rows="3"
+              class="w-full px-4 py-3 border-2 border-indigo-200 rounded-xl focus:ring-4 focus:ring-indigo-300 focus:border-indigo-400 outline-none"
+              placeholder="Notas adicionales sobre la cita..."
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="flex gap-4 mt-6">
+          <button
+            type="submit"
+            class="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-bold py-4 rounded-2xl transition shadow-lg"
+          >
+            💾 Guardar Cita
+          </button>
+          <button
+            type="button"
+            id="btnCancelar"
+            class="flex-1 bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white font-bold py-4 rounded-2xl transition shadow-lg"
+          >
+            ❌ Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de Enlace de Confirmación -->
+  <div id="enlaceModal" class="hidden fixed inset-0 flex items-center justify-center z-50" style="backdrop-filter: blur(10px); background-color: rgba(0, 0, 0, 0.3);">
+    <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-2xl border-4 border-green-300">
+      <div class="text-center mb-6">
+        <div class="text-6xl mb-4">✅</div>
+        <h3 class="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">¡Cita Creada Exitosamente!</h3>
+        <p class="text-gray-600 mt-2">Comparte este enlace con el cliente para que confirme la cita</p>
+      </div>
+
+      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl border-2 border-blue-200 mb-6">
+        <label class="block text-blue-700 font-bold mb-3">🔗 Enlace de Confirmación</label>
+        <div class="flex gap-3">
+          <input
+            type="text"
+            id="enlaceConfirmacion"
+            readonly
+            class="flex-1 px-4 py-3 border-2 border-blue-300 rounded-xl bg-white text-blue-600 font-mono text-sm"
+          />
+          <button
+            id="btnCopiarEnlace"
+            class="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-bold px-6 py-3 rounded-xl transition shadow-lg whitespace-nowrap"
+          >
+            📋 Copiar
+          </button>
+        </div>
+        <p class="text-xs text-blue-600 mt-3" id="mensajeCopiado"></p>
+      </div>
+
+      <div class="bg-gradient-to-r from-yellow-50 to-amber-50 p-5 rounded-2xl border-2 border-yellow-300 mb-6">
+        <p class="text-sm text-yellow-800">
+          <strong>💡 Instrucciones:</strong><br/>
+          1. Copia el enlace usando el botón "Copiar"<br/>
+          2. Envíalo al cliente por WhatsApp, SMS, email o tu método preferido<br/>
+          3. El cliente podrá ver los detalles y confirmar la cita<br/>
+          4. El estado cambiará automáticamente a "Confirmada" cuando el cliente acepte
+        </p>
+      </div>
+
+      <div id="detallesCitaCreada" class="bg-white p-5 rounded-2xl border-2 border-gray-200 mb-6">
+        <!-- Se llenará con JavaScript -->
+      </div>
+
+      <button
+        id="btnCerrarEnlace"
+        class="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-4 rounded-2xl transition shadow-lg"
+      >
+        ✓ Entendido
+      </button>
+    </div>
+  </div>
+
+  <script>
+    import { storage } from '../lib/storage';
+    import { Auth } from '../lib/auth';
+    import type { Cita, Cliente, Mascota } from '../lib/types';
+
+    storage.init();
+
+    const session = Auth.getSession();
+    if (!session) {
+      window.location.href = '/';
+    }
+
+    // Función para generar token único
+    function generarToken(): string {
+      return Math.random().toString(36).substring(2, 15) + 
+             Math.random().toString(36).substring(2, 15) + 
+             Date.now().toString(36);
+    }
+
+    const modal = document.getElementById('citaModal')!;
+    const citaForm = document.getElementById('citaForm') as HTMLFormElement;
+    const citasList = document.getElementById('citasList')!;
+    const searchInput = document.getElementById('searchInput') as HTMLInputElement;
+    const fechaFilter = document.getElementById('fechaFilter') as HTMLInputElement;
+    const estadoFilter = document.getElementById('estadoFilter') as HTMLSelectElement;
+
+    let editandoId: string | null = null;
+
+    // Obtener emoji según estado
+    function getEmojiEstado(estado: string): string {
+      const emojis: { [key: string]: string } = {
+        'Pendiente': '⏳',
+        'Confirmada': '✅',
+        'Completada': '✔️',
+        'Cancelada': '❌'
+      };
+      return emojis[estado] || '📅';
+    }
+
+    // Obtener color según estado
+    function getColorEstado(estado: string): string {
+      const colores: { [key: string]: string } = {
+        'Pendiente': 'from-yellow-100 to-orange-100 border-yellow-300',
+        'Confirmada': 'from-green-100 to-emerald-100 border-green-300',
+        'Completada': 'from-blue-100 to-cyan-100 border-blue-300',
+        'Cancelada': 'from-red-100 to-rose-100 border-red-300'
+      };
+      return colores[estado] || 'from-gray-100 to-slate-100 border-gray-300';
+    }
+
+    // Formatear fecha
+    function formatearFecha(fechaISO: string): string {
+      const fecha = new Date(fechaISO + 'T00:00:00');
+      return fecha.toLocaleDateString('es-MX', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    }
+
+    // Función para renderizar citas
+    function renderCitas(citas: Cita[]) {
+      const countEl = document.getElementById('countCitas');
+      if (countEl) {
+        countEl.textContent = `${citas.length} ${citas.length === 1 ? 'cita' : 'citas'}`;
+      }
+
+      if (citas.length === 0) {
+        citasList.innerHTML = '<p class="text-blue-500 text-center py-8 font-medium">🔍 No se encontraron citas con los criterios seleccionados</p>';
+        return;
+      }
+
+      const clientes = storage.getClientes(session!.veterinariaId);
+      const mascotas = storage.getMascotas(session!.veterinariaId);
+
+      // Ordenar citas por fecha y hora
+      const citasOrdenadas = [...citas].sort((a, b) => {
+        const fechaA = new Date(a.fecha + 'T' + a.hora);
+        const fechaB = new Date(b.fecha + 'T' + b.hora);
+        return fechaB.getTime() - fechaA.getTime();
+      });
+
+      citasList.innerHTML = citasOrdenadas.map(cita => {
+        const cliente = clientes.find(c => c.id === cita.clienteId);
+        const mascota = mascotas.find(m => m.id === cita.mascotaId);
+        const emoji = getEmojiEstado(cita.estado);
+        const colorClase = getColorEstado(cita.estado);
+        
+        return `
+          <div class="border-4 bg-gradient-to-br ${colorClase} p-6 rounded-2xl hover:shadow-2xl transition">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex items-start gap-4 flex-1">
+                <div class="text-5xl drop-shadow-lg">${emoji}</div>
+                <div class="flex-1">
+                  <div class="flex items-center gap-3 mb-3">
+                    <h4 class="text-2xl font-bold text-gray-800">${mascota?.nombre || 'Desconocido'}</h4>
+                    <span class="bg-white px-3 py-1 rounded-full text-sm font-semibold text-gray-700">${cita.estado}</span>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                    <div class="bg-white px-4 py-3 rounded-xl">
+                      <p class="font-bold text-gray-700">👤 Cliente</p>
+                      <p class="text-gray-600">${cliente?.nombre || 'Desconocido'}</p>
+                      <p class="text-xs text-gray-500 mt-1">📞 ${cliente?.telefono || 'N/A'}</p>
+                    </div>
+                    <div class="bg-white px-4 py-3 rounded-xl">
+                      <p class="font-bold text-gray-700">🐾 Mascota</p>
+                      <p class="text-gray-600">${mascota?.especie || 'N/A'} - ${mascota?.raza || 'N/A'}</p>
+                      <p class="text-xs text-gray-500 mt-1">🎂 ${mascota?.edad || 0} ${mascota?.edad === 1 ? 'año' : 'años'}</p>
+                    </div>
+                    <div class="bg-white px-4 py-3 rounded-xl">
+                      <p class="font-bold text-gray-700">📆 Fecha y Hora</p>
+                      <p class="text-gray-600">${formatearFecha(cita.fecha)}</p>
+                      <p class="text-lg font-bold text-blue-600 mt-1">⏰ ${cita.hora}</p>
+                    </div>
+                    <div class="bg-white px-4 py-3 rounded-xl">
+                      <p class="font-bold text-gray-700">📝 Motivo</p>
+                      <p class="text-gray-600">${cita.motivo}</p>
+                    </div>
+                  </div>
+                  ${cita.observaciones ? `
+                    <div class="mt-3 bg-white p-3 rounded-xl border-2 border-blue-200">
+                      <p class="text-xs font-bold text-blue-700">💬 Observaciones:</p>
+                      <p class="text-sm text-gray-700 mt-1">${cita.observaciones}</p>
+                    </div>
+                  ` : ''}
+                </div>
+              </div>
+              <div class="flex flex-col gap-2">
+                <button
+                  onclick="editarCita('${cita.id}')"
+                  class="bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-white px-4 py-2 rounded-xl transition text-sm font-bold shadow-lg whitespace-nowrap"
+                >
+                  ✏️ Editar
+                </button>
+                <button
+                  onclick="eliminarCita('${cita.id}', '${cliente?.nombre || 'Desconocido'}', '${mascota?.nombre || 'Desconocido'}')"
+                  class="bg-gradient-to-r from-red-400 to-rose-500 hover:from-red-500 hover:to-rose-600 text-white px-4 py-2 rounded-xl transition text-sm font-bold shadow-lg whitespace-nowrap"
+                >
+                  🗑️ Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Cargar clientes en el select
+    function cargarClientesSelect(filtro: string = '') {
+      const clienteSelect = document.getElementById('clienteId') as HTMLSelectElement;
+      const clientes = storage.getClientes(session!.veterinariaId);
+      
+      const terminoBusqueda = filtro.toLowerCase().trim();
+      const clientesFiltrados = terminoBusqueda 
+        ? clientes.filter(c => 
+            c.nombre.toLowerCase().includes(terminoBusqueda) ||
+            c.telefono.toLowerCase().includes(terminoBusqueda)
+          )
+        : clientes;
+      
+      const valorActual = clienteSelect.value;
+      
+      if (clientesFiltrados.length === 0) {
+        clienteSelect.innerHTML = '<option value="">❌ No se encontraron clientes</option>';
+      } else {
+        clienteSelect.innerHTML = '<option value="">📋 Seleccionar cliente...</option>' +
+          clientesFiltrados.map(c => 
+            `<option value="${c.id}">${c.nombre} - 📞 ${c.telefono}</option>`
+          ).join('');
+      }
+      
+      if (valorActual && clientesFiltrados.find(c => c.id === valorActual)) {
+        clienteSelect.value = valorActual;
+      }
+    }
+
+    // Cargar mascotas del cliente seleccionado
+    function cargarMascotasCliente(clienteId: string) {
+      const mascotaSelect = document.getElementById('mascotaId') as HTMLSelectElement;
+      
+      if (!clienteId) {
+        mascotaSelect.disabled = true;
+        mascotaSelect.innerHTML = '<option value="">Primero selecciona un cliente...</option>';
+        document.getElementById('mascotaInfo')!.classList.add('hidden');
+        return;
+      }
+
+      const mascotas = storage.getMascotasByCliente(clienteId);
+      
+      if (mascotas.length === 0) {
+        mascotaSelect.disabled = true;
+        mascotaSelect.innerHTML = '<option value="">Este cliente no tiene mascotas registradas</option>';
+        document.getElementById('mascotaInfo')!.classList.add('hidden');
+        return;
+      }
+
+      mascotaSelect.disabled = false;
+      mascotaSelect.innerHTML = '<option value="">Seleccionar mascota...</option>' +
+        mascotas.map(m => 
+          `<option value="${m.id}">${m.nombre} - ${m.especie} (${m.raza || 'N/A'})</option>`
+        ).join('');
+    }
+
+    // Buscar clientes en tiempo real
+    const buscarClienteInput = document.getElementById('buscarCliente') as HTMLInputElement;
+    buscarClienteInput.addEventListener('input', () => {
+      const filtro = buscarClienteInput.value;
+      cargarClientesSelect(filtro);
+    });
+
+    // Al seleccionar cliente
+    const clienteSelect = document.getElementById('clienteId') as HTMLSelectElement;
+    clienteSelect.addEventListener('change', () => {
+      const clienteInfo = document.getElementById('clienteInfo')!;
+      const clienteNombre = document.getElementById('clienteNombre')!;
+      const clienteContacto = document.getElementById('clienteContacto')!;
+      
+      if (clienteSelect.value) {
+        const clientes = storage.getClientes(session!.veterinariaId);
+        const cliente = clientes.find(c => c.id === clienteSelect.value);
+        if (cliente) {
+          clienteNombre.textContent = cliente.nombre;
+          clienteContacto.textContent = `📞 ${cliente.telefono}${cliente.email ? ` | 📧 ${cliente.email}` : ''}`;
+          clienteInfo.classList.remove('hidden');
+          cargarMascotasCliente(cliente.id);
+        }
+      } else {
+        clienteInfo.classList.add('hidden');
+        cargarMascotasCliente('');
+      }
+    });
+
+    // Al seleccionar mascota
+    const mascotaSelect = document.getElementById('mascotaId') as HTMLSelectElement;
+    mascotaSelect.addEventListener('change', () => {
+      const mascotaInfo = document.getElementById('mascotaInfo')!;
+      const mascotaNombre = document.getElementById('mascotaNombre')!;
+      const mascotaDetalles = document.getElementById('mascotaDetalles')!;
+      
+      if (mascotaSelect.value) {
+        const mascotas = storage.getMascotas(session!.veterinariaId);
+        const mascota = mascotas.find(m => m.id === mascotaSelect.value);
+        if (mascota) {
+          mascotaNombre.textContent = mascota.nombre;
+          mascotaDetalles.textContent = `${mascota.especie} - ${mascota.raza || 'N/A'} | 🎂 ${mascota.edad} ${mascota.edad === 1 ? 'año' : 'años'}`;
+          mascotaInfo.classList.remove('hidden');
+        }
+      } else {
+        mascotaInfo.classList.add('hidden');
+      }
+    });
+
+    // Cargar todas las citas
+    function cargarCitas() {
+      const citas = storage.getCitas(session!.veterinariaId);
+      renderCitas(citas);
+    }
+
+    // Filtrar citas
+    function filtrarCitas() {
+      const termino = searchInput.value.trim().toLowerCase();
+      const fecha = fechaFilter.value;
+      const estado = estadoFilter.value;
+      
+      let citas = storage.getCitas(session!.veterinariaId);
+      const clientes = storage.getClientes(session!.veterinariaId);
+      const mascotas = storage.getMascotas(session!.veterinariaId);
+
+      if (termino) {
+        citas = citas.filter(c => {
+          const cliente = clientes.find(cl => cl.id === c.clienteId);
+          const mascota = mascotas.find(m => m.id === c.mascotaId);
+          return (cliente?.nombre.toLowerCase().includes(termino) ||
+                  mascota?.nombre.toLowerCase().includes(termino) ||
+                  c.motivo.toLowerCase().includes(termino));
+        });
+      }
+
+      if (fecha) {
+        citas = citas.filter(c => c.fecha === fecha);
+      }
+
+      if (estado) {
+        citas = citas.filter(c => c.estado === estado);
+      }
+
+      renderCitas(citas);
+    }
+
+    // Abrir modal para nueva cita
+    document.getElementById('btnNuevaCita')!.addEventListener('click', () => {
+      editandoId = null;
+      citaForm.reset();
+      buscarClienteInput.value = '';
+      (document.getElementById('modalTitle') as HTMLElement).textContent = '📅 Nueva Cita';
+      cargarClientesSelect();
+      cargarMascotasCliente('');
+      document.getElementById('clienteInfo')!.classList.add('hidden');
+      document.getElementById('mascotaInfo')!.classList.add('hidden');
+      
+      // Establecer fecha mínima como hoy
+      const hoy = new Date().toISOString().split('T')[0];
+      (document.getElementById('fecha') as HTMLInputElement).min = hoy;
+      
+      modal.classList.remove('hidden');
+    });
+
+    // Cerrar modal
+    function cerrarModal() {
+      modal.classList.add('hidden');
+      citaForm.reset();
+      editandoId = null;
+      buscarClienteInput.value = '';
+      cargarClientesSelect();
+      cargarMascotasCliente('');
+      document.getElementById('clienteInfo')!.classList.add('hidden');
+      document.getElementById('mascotaInfo')!.classList.add('hidden');
+    }
+
+    // Mostrar enlace de confirmación
+    function mostrarEnlaceConfirmacion(cita: Cita) {
+      const enlaceModal = document.getElementById('enlaceModal')!;
+      const enlaceInput = document.getElementById('enlaceConfirmacion') as HTMLInputElement;
+      const detallesDiv = document.getElementById('detallesCitaCreada')!;
+      
+      // Generar URL completa
+      const baseUrl = window.location.origin;
+      const urlConfirmacion = `${baseUrl}/confirmar-cita?token=${cita.tokenConfirmacion}`;
+      enlaceInput.value = urlConfirmacion;
+
+      // Mostrar detalles de la cita
+      const clientes = storage.getClientes(session!.veterinariaId);
+      const mascotas = storage.getMascotas(session!.veterinariaId);
+      const cliente = clientes.find(c => c.id === cita.clienteId);
+      const mascota = mascotas.find(m => m.id === cita.mascotaId);
+
+      detallesDiv.innerHTML = `
+        <h4 class="font-bold text-gray-700 mb-3">📋 Detalles de la Cita:</h4>
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          <div><strong>Cliente:</strong> ${cliente?.nombre || 'N/A'}</div>
+          <div><strong>Teléfono:</strong> ${cliente?.telefono || 'N/A'}</div>
+          <div><strong>Mascota:</strong> ${mascota?.nombre || 'N/A'}</div>
+          <div><strong>Especie:</strong> ${mascota?.especie || 'N/A'}</div>
+          <div><strong>Fecha:</strong> ${formatearFecha(cita.fecha)}</div>
+          <div><strong>Hora:</strong> ${cita.hora}</div>
+          <div class="col-span-2"><strong>Motivo:</strong> ${cita.motivo}</div>
+        </div>
+      `;
+
+      enlaceModal.classList.remove('hidden');
+    }
+
+    // Copiar enlace
+    document.getElementById('btnCopiarEnlace')!.addEventListener('click', async () => {
+      const enlaceInput = document.getElementById('enlaceConfirmacion') as HTMLInputElement;
+      const mensajeDiv = document.getElementById('mensajeCopiado')!;
+      
+      try {
+        await navigator.clipboard.writeText(enlaceInput.value);
+        mensajeDiv.textContent = '✅ ¡Enlace copiado al portapapeles!';
+        mensajeDiv.className = 'text-xs text-green-600 mt-3 font-semibold';
+        
+        setTimeout(() => {
+          mensajeDiv.textContent = '';
+        }, 3000);
+      } catch (err) {
+        // Fallback para navegadores que no soportan clipboard API
+        enlaceInput.select();
+        document.execCommand('copy');
+        mensajeDiv.textContent = '✅ ¡Enlace copiado!';
+        mensajeDiv.className = 'text-xs text-green-600 mt-3 font-semibold';
+        
+        setTimeout(() => {
+          mensajeDiv.textContent = '';
+        }, 3000);
+      }
+    });
+
+    // Cerrar modal de enlace
+    document.getElementById('btnCerrarEnlace')!.addEventListener('click', () => {
+      document.getElementById('enlaceModal')!.classList.add('hidden');
+    });
+
+    document.getElementById('btnCerrarModal')!.addEventListener('click', cerrarModal);
+    document.getElementById('btnCancelar')!.addEventListener('click', cerrarModal);
+
+    // Guardar cita
+    citaForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const clienteId = (document.getElementById('clienteId') as HTMLSelectElement).value;
+      const mascotaId = (document.getElementById('mascotaId') as HTMLSelectElement).value;
+      const fecha = (document.getElementById('fecha') as HTMLInputElement).value;
+      const hora = (document.getElementById('hora') as HTMLInputElement).value;
+      const motivo = (document.getElementById('motivo') as HTMLInputElement).value;
+      const estado = (document.getElementById('estado') as HTMLSelectElement).value as 'Pendiente' | 'Confirmada' | 'Completada' | 'Cancelada';
+      const observaciones = (document.getElementById('observaciones') as HTMLTextAreaElement).value;
+
+      if (editandoId) {
+        storage.updateCita(editandoId, {
+          clienteId,
+          mascotaId,
+          fecha,
+          hora,
+          motivo,
+          estado,
+          observaciones
+        });
+        cerrarModal();
+        cargarCitas();
+      } else {
+        const token = generarToken();
+        const nuevaCita: Cita = {
+          id: `cita-${Date.now()}`,
+          clienteId,
+          mascotaId,
+          veterinarioId: session!.id,
+          veterinariaId: session!.veterinariaId,
+          fecha,
+          hora,
+          motivo,
+          estado,
+          observaciones,
+          fechaCreacion: new Date().toISOString(),
+          tokenConfirmacion: token
+        };
+        storage.saveCita(nuevaCita);
+        cerrarModal();
+        cargarCitas();
+        mostrarEnlaceConfirmacion(nuevaCita);
+      }
+    });
+
+    // Editar cita
+    (window as any).editarCita = (id: string) => {
+      const citas = storage.getCitas(session!.veterinariaId);
+      const cita = citas.find(c => c.id === id);
+      
+      if (cita) {
+        editandoId = id;
+        buscarClienteInput.value = '';
+        cargarClientesSelect();
+        
+        (document.getElementById('clienteId') as HTMLSelectElement).value = cita.clienteId;
+        clienteSelect.dispatchEvent(new Event('change'));
+        
+        setTimeout(() => {
+          (document.getElementById('mascotaId') as HTMLSelectElement).value = cita.mascotaId;
+          mascotaSelect.dispatchEvent(new Event('change'));
+        }, 100);
+        
+        (document.getElementById('fecha') as HTMLInputElement).value = cita.fecha;
+        (document.getElementById('hora') as HTMLInputElement).value = cita.hora;
+        (document.getElementById('motivo') as HTMLInputElement).value = cita.motivo;
+        (document.getElementById('estado') as HTMLSelectElement).value = cita.estado;
+        (document.getElementById('observaciones') as HTMLTextAreaElement).value = cita.observaciones || '';
+        (document.getElementById('modalTitle') as HTMLElement).textContent = '✏️ Editar Cita';
+        
+        modal.classList.remove('hidden');
+      }
+    };
+
+    // Eliminar cita
+    (window as any).eliminarCita = (id: string, clienteNombre: string, mascotaNombre: string) => {
+      if (confirm(`¿Estás seguro de eliminar la cita de "${mascotaNombre}" (Cliente: ${clienteNombre})?`)) {
+        storage.deleteCita(id);
+        cargarCitas();
+      }
+    };
+
+    // Eventos de búsqueda y filtros
+    searchInput.addEventListener('input', filtrarCitas);
+    fechaFilter.addEventListener('change', filtrarCitas);
+    estadoFilter.addEventListener('change', filtrarCitas);
+
+    document.getElementById('btnVerTodas')!.addEventListener('click', () => {
+      searchInput.value = '';
+      fechaFilter.value = '';
+      estadoFilter.value = '';
+      cargarCitas();
+    });
+
+    // Cargar datos al iniciar
+    cargarCitas();
+  </script>
+</DashboardLayout>

@@ -1,5 +1,5 @@
 // Sistema de almacenamiento local simulado
-import type { Usuario, Veterinaria, Cliente, Mascota, Producto } from './types';
+import type { Usuario, Veterinaria, Cliente, Mascota, Producto, Cita } from './types';
 
 // Datos iniciales
 const INITIAL_DATA = {
@@ -29,6 +29,17 @@ const INITIAL_DATA = {
       telefono: '555-0101',
       rol: 'veterinario' as const,
       veterinariaId: 'vet-1'
+    },
+    {
+      id: 'user-3',
+      username: 'cliente1',
+      password: 'cliente123',
+      nombre: 'María García Rodríguez',
+      telefono: '555-1001',
+      email: 'maria.garcia@example.com',
+      rol: 'cliente' as const,
+      veterinariaId: 'vet-1',
+      clienteId: 'cli-1'
     }
   ] as Usuario[],
   clientes: [
@@ -316,7 +327,34 @@ const INITIAL_DATA = {
     { id: 'prod-28', nombre: 'Bebedero Automático', descripcion: 'Fuente de agua con filtro', precio: 450, stock: 22, categoria: 'Accesorios', especiesRecomendadas: ['Perro', 'Gato'], veterinariaId: 'vet-1' },
     { id: 'prod-29', nombre: 'Alimento para Pez', descripcion: 'Escamas nutritivas', precio: 55, stock: 100, categoria: 'Alimento', especiesRecomendadas: ['Otro'], veterinariaId: 'vet-1' },
     { id: 'prod-30', nombre: 'Collar con Placa', descripcion: 'Collar ajustable con placa de identificación', precio: 135, stock: 65, categoria: 'Accesorios', especiesRecomendadas: ['Perro', 'Gato'], veterinariaId: 'vet-1' }
-  ] as Producto[]
+  ] as Producto[],
+  citas: [
+    { id: 'cita-1', clienteId: 'cli-1', mascotaId: 'mas-1', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-02-25', hora: '10:00', motivo: 'Vacunación anual', estado: 'Pendiente', observaciones: '', fechaCreacion: '2026-02-19T10:00:00Z', tokenConfirmacion: 'ABC123XYZ', confirmadaPor: undefined, fechaConfirmacion: undefined },
+    { id: 'cita-2', clienteId: 'cli-2', mascotaId: 'mas-2', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-02-26', hora: '11:30', motivo: 'Control general', estado: 'Confirmada', observaciones: 'Cliente confirmó por teléfono', fechaCreacion: '2026-02-18T14:00:00Z', tokenConfirmacion: 'DEF456ABC', confirmadaPor: '192.168.1.1', fechaConfirmacion: '2026-02-19T09:00:00Z' },
+    { id: 'cita-3', clienteId: 'cli-3', mascotaId: 'mas-3', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-02-20', hora: '09:00', motivo: 'Revisión de piel', estado: 'Completada', observaciones: 'Se aplicó tratamiento tópico', fechaCreacion: '2026-02-15T10:00:00Z', tokenConfirmacion: 'GHI789DEF', confirmadaPor: '192.168.1.2', fechaConfirmacion: '2026-02-16T11:00:00Z' },
+    { id: 'cita-4', clienteId: 'cli-4', mascotaId: 'mas-4', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-02-27', hora: '15:00', motivo: 'Desparasitación', estado: 'Pendiente', observaciones: '', fechaCreacion: '2026-02-19T11:00:00Z', tokenConfirmacion: 'JKL012GHI', confirmadaPor: undefined, fechaConfirmacion: undefined },
+    { id: 'cita-5', clienteId: 'cli-5', mascotaId: 'mas-5', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-02-28', hora: '16:30', motivo: 'Corte de uñas', estado: 'Confirmada', observaciones: '', fechaCreacion: '2026-02-19T08:00:00Z', tokenConfirmacion: 'MNO345JKL', confirmadaPor: '192.168.1.3', fechaConfirmacion: '2026-02-19T12:00:00Z' },
+    { id: 'cita-6', clienteId: 'cli-6', mascotaId: 'mas-6', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-03-01', hora: '10:30', motivo: 'Control de peso', estado: 'Pendiente', observaciones: 'Gato con sobrepeso', fechaCreacion: '2026-02-19T13:00:00Z', tokenConfirmacion: 'PQR678MNO', confirmadaPor: undefined, fechaConfirmacion: undefined },
+    { id: 'cita-7', clienteId: 'cli-7', mascotaId: 'mas-7', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-03-02', hora: '14:00', motivo: 'Limpieza dental', estado: 'Pendiente', observaciones: '', fechaCreacion: '2026-02-19T14:00:00Z', tokenConfirmacion: 'STU901PQR', confirmadaPor: undefined, fechaConfirmacion: undefined },
+    { id: 'cita-8', clienteId: 'cli-8', mascotaId: 'mas-8', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-02-18', hora: '11:00', motivo: 'Esterilización', estado: 'Completada', observaciones: 'Cirugía exitosa, recuperación normal', fechaCreacion: '2026-02-10T10:00:00Z', tokenConfirmacion: 'VWX234STU', confirmadaPor: '192.168.1.4', fechaConfirmacion: '2026-02-11T09:00:00Z' },
+    { id: 'cita-9', clienteId: 'cli-9', mascotaId: 'mas-9', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-03-03', hora: '09:30', motivo: 'Vacunación rabia', estado: 'Confirmada', observaciones: '', fechaCreacion: '2026-02-19T15:00:00Z', tokenConfirmacion: 'YZA567VWX', confirmadaPor: '192.168.1.5', fechaConfirmacion: '2026-02-19T16:00:00Z' },
+    { id: 'cita-10', clienteId: 'cli-10', mascotaId: 'mas-10', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-03-04', hora: '13:00', motivo: 'Revisión de plumas', estado: 'Pendiente', observaciones: 'Ave loro hablador', fechaCreacion: '2026-02-19T09:00:00Z', tokenConfirmacion: 'BCD890YZA', confirmadaPor: undefined, fechaConfirmacion: undefined },
+    { id: 'cita-11', clienteId: 'cli-11', mascotaId: 'mas-11', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-02-21', hora: '10:00', motivo: 'Control general conejo', estado: 'Completada', observaciones: 'Estado de salud excelente', fechaCreacion: '2026-02-14T10:00:00Z', tokenConfirmacion: 'EFG123BCD', confirmadaPor: '192.168.1.6', fechaConfirmacion: '2026-02-15T10:00:00Z' },
+    { id: 'cita-12', clienteId: 'cli-12', mascotaId: 'mas-12', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-03-05', hora: '15:30', motivo: 'Revisión post-entrenamiento', estado: 'Pendiente', observaciones: 'Perro entrenado', fechaCreacion: '2026-02-19T10:00:00Z', tokenConfirmacion: 'HIJ456EFG', confirmadaPor: undefined, fechaConfirmacion: undefined },
+    { id: 'cita-13', clienteId: 'cli-13', mascotaId: 'mas-13', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-02-22', hora: '12:00', motivo: 'Aplicación de vacunas', estado: 'Cancelada', observaciones: 'Cliente canceló por viaje', fechaCreacion: '2026-02-16T10:00:00Z', tokenConfirmacion: 'KLM789HIJ', confirmadaPor: undefined, fechaConfirmacion: undefined },
+    { id: 'cita-14', clienteId: 'cli-14', mascotaId: 'mas-14', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-03-06', hora: '11:00', motivo: 'Chequeo anual', estado: 'Confirmada', observaciones: 'Perro muy sociable', fechaCreacion: '2026-02-19T11:00:00Z', tokenConfirmacion: 'NOP012KLM', confirmadaPor: '192.168.1.7', fechaConfirmacion: '2026-02-19T13:00:00Z' },
+    { id: 'cita-15', clienteId: 'cli-15', mascotaId: 'mas-15', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-03-07', hora: '14:30', motivo: 'Control dermatológico', estado: 'Pendiente', observaciones: '', fechaCreacion: '2026-02-19T12:00:00Z', tokenConfirmacion: 'QRS345NOP', confirmadaPor: undefined, fechaConfirmacion: undefined },
+    { id: 'cita-16', clienteId: 'cli-16', mascotaId: 'mas-16', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-03-08', hora: '10:00', motivo: 'Vacunación múltiple', estado: 'Pendiente', observaciones: '', fechaCreacion: '2026-02-19T13:00:00Z', tokenConfirmacion: 'TUV678QRS', confirmadaPor: undefined, fechaConfirmacion: undefined },
+    { id: 'cita-17', clienteId: 'cli-17', mascotaId: 'mas-17', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-03-09', hora: '16:00', motivo: 'Control hámster', estado: 'Confirmada', observaciones: 'Le gusta correr mucho', fechaCreacion: '2026-02-19T14:00:00Z', tokenConfirmacion: 'WXY901TUV', confirmadaPor: '192.168.1.8', fechaConfirmacion: '2026-02-19T15:00:00Z' },
+    { id: 'cita-18', clienteId: 'cli-18', mascotaId: 'mas-18', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-02-23', hora: '09:00', motivo: 'Revisión de canto', estado: 'Completada', observaciones: 'Canario en buen estado', fechaCreacion: '2026-02-17T10:00:00Z', tokenConfirmacion: 'ZAB234WXY', confirmadaPor: '192.168.1.9', fechaConfirmacion: '2026-02-18T10:00:00Z' },
+    { id: 'cita-19', clienteId: 'cli-19', mascotaId: 'mas-19', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-03-10', hora: '13:30', motivo: 'Consulta por comportamiento', estado: 'Pendiente', observaciones: 'Gato asustadizo', fechaCreacion: '2026-02-19T15:00:00Z', tokenConfirmacion: 'CDE567ZAB', confirmadaPor: undefined, fechaConfirmacion: undefined },
+    { id: 'cita-20', clienteId: 'cli-20', mascotaId: 'mas-20', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-03-11', hora: '11:30', motivo: 'Vacunación completa', estado: 'Confirmada', observaciones: '', fechaCreacion: '2026-02-19T16:00:00Z', tokenConfirmacion: 'FGH890CDE', confirmadaPor: '192.168.1.10', fechaConfirmacion: '2026-02-19T17:00:00Z' },
+    { id: 'cita-21', clienteId: 'cli-21', mascotaId: 'mas-21', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-03-12', hora: '15:00', motivo: 'Control ave', estado: 'Pendiente', observaciones: '', fechaCreacion: '2026-02-19T17:00:00Z', tokenConfirmacion: 'IJK123FGH', confirmadaPor: undefined, fechaConfirmacion: undefined },
+    { id: 'cita-22', clienteId: 'cli-22', mascotaId: 'mas-22', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-02-24', hora: '10:30', motivo: 'Evaluación de comportamiento', estado: 'Completada', observaciones: 'Perro muy protector, bien socializado', fechaCreacion: '2026-02-18T10:00:00Z', tokenConfirmacion: 'LMN456IJK', confirmadaPor: '192.168.1.11', fechaConfirmacion: '2026-02-19T09:00:00Z' },
+    { id: 'cita-23', clienteId: 'cli-23', mascotaId: 'mas-23', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-03-13', hora: '12:30', motivo: 'Limpieza dental', estado: 'Pendiente', observaciones: '', fechaCreacion: '2026-02-19T18:00:00Z', tokenConfirmacion: 'OPQ789LMN', confirmadaPor: undefined, fechaConfirmacion: undefined },
+    { id: 'cita-24', clienteId: 'cli-24', mascotaId: 'mas-24', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-03-14', hora: '14:00', motivo: 'Control respiratorio', estado: 'Confirmada', observaciones: 'Pug con problemas respiratorios', fechaCreacion: '2026-02-19T19:00:00Z', tokenConfirmacion: 'RST012OPQ', confirmadaPor: '192.168.1.12', fechaConfirmacion: '2026-02-19T20:00:00Z' },
+    { id: 'cita-25', clienteId: 'cli-25', mascotaId: 'mas-25', veterinarioId: 'user-2', veterinariaId: 'vet-1', fecha: '2026-03-15', hora: '09:00', motivo: 'Vacunación', estado: 'Pendiente', observaciones: '', fechaCreacion: '2026-02-19T08:00:00Z', tokenConfirmacion: 'UVW345RST', confirmadaPor: undefined, fechaConfirmacion: undefined }
+  ] as Cita[]
 };
 
 class Storage {
@@ -333,6 +371,7 @@ class Storage {
       localStorage.setItem(this.getKey('clientes'), JSON.stringify(INITIAL_DATA.clientes));
       localStorage.setItem(this.getKey('mascotas'), JSON.stringify(INITIAL_DATA.mascotas));
       localStorage.setItem(this.getKey('productos'), JSON.stringify(INITIAL_DATA.productos));
+      localStorage.setItem(this.getKey('citas'), JSON.stringify(INITIAL_DATA.citas));
       localStorage.setItem(this.getKey('initialized'), 'true');
     }
   }
@@ -464,6 +503,54 @@ class Storage {
       p.especiesRecomendadas.length === 0 || 
       p.especiesRecomendadas.includes(especie)
     );
+  }
+
+  // Citas
+  getCitas(veterinariaId?: string): Cita[] {
+    const data = localStorage.getItem(this.getKey('citas'));
+    const citas = data ? JSON.parse(data) : [];
+    return veterinariaId ? citas.filter((c: Cita) => c.veterinariaId === veterinariaId) : citas;
+  }
+
+  saveCita(cita: Cita) {
+    const citas = this.getCitas();
+    citas.push(cita);
+    localStorage.setItem(this.getKey('citas'), JSON.stringify(citas));
+  }
+
+  updateCita(id: string, data: Partial<Cita>) {
+    const citas = this.getCitas();
+    const index = citas.findIndex(c => c.id === id);
+    if (index !== -1) {
+      citas[index] = { ...citas[index], ...data };
+      localStorage.setItem(this.getKey('citas'), JSON.stringify(citas));
+    }
+  }
+
+  deleteCita(id: string) {
+    const citas = this.getCitas();
+    const filtered = citas.filter(c => c.id !== id);
+    localStorage.setItem(this.getKey('citas'), JSON.stringify(filtered));
+  }
+
+  getCitasByCliente(clienteId: string): Cita[] {
+    const citas = this.getCitas();
+    return citas.filter(c => c.clienteId === clienteId);
+  }
+
+  getCitasByMascota(mascotaId: string): Cita[] {
+    const citas = this.getCitas();
+    return citas.filter(c => c.mascotaId === mascotaId);
+  }
+
+  getCitasByFecha(fecha: string, veterinariaId: string): Cita[] {
+    const citas = this.getCitas(veterinariaId);
+    return citas.filter(c => c.fecha === fecha);
+  }
+
+  getCitasByVeterinario(veterinarioId: string): Cita[] {
+    const citas = this.getCitas();
+    return citas.filter(c => c.veterinarioId === veterinarioId);
   }
 }
 

@@ -45,6 +45,27 @@ import Layout from '../layouts/Layout.astro';
         </div>
 
         <div>
+          <label class="block text-purple-700 font-bold mb-2">� Email <span class="text-sm text-gray-500">(opcional)</span></label>
+          <input
+            type="email"
+            id="email"
+            class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 outline-none transition"
+            placeholder="correo@ejemplo.com"
+          />
+        </div>
+
+        <!-- Campo adicional para clientes -->
+        <div id="direccionField" class="hidden">
+          <label class="block text-purple-700 font-bold mb-2">📍 Dirección</label>
+          <input
+            type="text"
+            id="direccion"
+            class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 outline-none transition"
+            placeholder="Ej: Calle Principal #123"
+          />
+        </div>
+
+        <div>
           <label class="block text-purple-700 font-bold mb-2">🔒 Contraseña</label>
           <input
             type="password"
@@ -56,15 +77,21 @@ import Layout from '../layouts/Layout.astro';
         </div>
 
         <div>
-          <label class="block text-purple-700 font-bold mb-2">⭐ Rol</label>
+          <label class="block text-purple-700 font-bold mb-2">⭐ Tipo de Cuenta</label>
           <select
             id="rol"
             required
             class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 outline-none transition bg-gradient-to-r from-purple-50 to-pink-50"
           >
-            <option value="veterinario">Veterinario</option>
-            <option value="admin">Administrador</option>
+            <option value="cliente">👥 Cliente (Dueño de Mascota)</option>
+            <option value="veterinario">🩺 Veterinario</option>
+            <option value="admin">⚙️ Administrador</option>
           </select>
+        </div>
+
+        <div id="infoCliente" class="hidden bg-blue-50 border-2 border-blue-200 text-blue-700 px-4 py-3 rounded-xl text-sm">
+          <p class="font-semibold mb-1">ℹ️ Cuenta de Cliente:</p>
+          <p>Podrás ver el estado de tus mascotas, sus citas y confirmar citas asignadas.</p>
         </div>
 
         <div id="errorMsg" class="hidden bg-rose-100 border-2 border-rose-300 text-rose-700 px-4 py-3 rounded-xl text-sm font-medium"></div>
@@ -90,13 +117,29 @@ import Layout from '../layouts/Layout.astro';
   <script>
     import { storage } from '../lib/storage';
     import { Auth } from '../lib/auth';
-    import type { Usuario } from '../lib/types';
+    import type { Usuario, Cliente } from '../lib/types';
 
     storage.init();
 
     const registerForm = document.getElementById('registerForm') as HTMLFormElement;
     const errorMsg = document.getElementById('errorMsg') as HTMLDivElement;
     const successMsg = document.getElementById('successMsg') as HTMLDivElement;
+    const rolSelect = document.getElementById('rol') as HTMLSelectElement;
+    const direccionField = document.getElementById('direccionField')!;
+    const infoCliente = document.getElementById('infoCliente')!;
+
+    // Mostrar/ocultar campos según el rol
+    rolSelect.addEventListener('change', () => {
+      if (rolSelect.value === 'cliente') {
+        direccionField.classList.remove('hidden');
+        infoCliente.classList.remove('hidden');
+        (document.getElementById('direccion') as HTMLInputElement).required = true;
+      } else {
+        direccionField.classList.add('hidden');
+        infoCliente.classList.add('hidden');
+        (document.getElementById('direccion') as HTMLInputElement).required = false;
+      }
+    });
 
     registerForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -104,8 +147,10 @@ import Layout from '../layouts/Layout.astro';
       const nombre = (document.getElementById('nombre') as HTMLInputElement).value;
       const username = (document.getElementById('username') as HTMLInputElement).value;
       const telefono = (document.getElementById('telefono') as HTMLInputElement).value;
+      const email = (document.getElementById('email') as HTMLInputElement).value;
+      const direccion = (document.getElementById('direccion') as HTMLInputElement).value;
       const password = (document.getElementById('password') as HTMLInputElement).value;
-      const rol = (document.getElementById('rol') as HTMLSelectElement).value as 'admin' | 'veterinario';
+      const rol = (document.getElementById('rol') as HTMLSelectElement).value as 'admin' | 'veterinario' | 'cliente';
 
       if (password.length < 6) {
         errorMsg.textContent = 'La contraseña debe tener al menos 6 caracteres';
@@ -133,13 +178,39 @@ import Layout from '../layouts/Layout.astro';
       }
 
       try {
+        let clienteId: string | undefined = undefined;
+
+        // Si es cliente, crear el registro de cliente primero
+        if (rol === 'cliente') {
+          if (!direccion) {
+            errorMsg.textContent = 'La dirección es obligatoria para clientes';
+            errorMsg.classList.remove('hidden');
+            successMsg.classList.add('hidden');
+            return;
+          }
+
+          const nuevoCliente: Cliente = {
+            id: `cli-${Date.now()}`,
+            nombre,
+            telefono,
+            email: email || '',
+            direccion,
+            veterinariaId: 'vet-1',
+            fechaRegistro: new Date().toISOString()
+          };
+          storage.saveCliente(nuevoCliente);
+          clienteId = nuevoCliente.id;
+        }
+
         const newUsuario: Omit<Usuario, 'id'> = {
           username,
           password,
           nombre,
           telefono,
+          email: email || undefined,
           rol,
-          veterinariaId: 'vet-1' // Por defecto la primera veterinaria
+          veterinariaId: 'vet-1',
+          clienteId
         };
 
         Auth.register(newUsuario);
@@ -149,7 +220,11 @@ import Layout from '../layouts/Layout.astro';
         errorMsg.classList.add('hidden');
 
         setTimeout(() => {
-          window.location.href = '/dashboard';
+          if (rol === 'cliente') {
+            window.location.href = '/mi-cuenta';
+          } else {
+            window.location.href = '/dashboard';
+          }
         }, 1500);
       } catch (error) {
         errorMsg.textContent = 'Error al registrar usuario';

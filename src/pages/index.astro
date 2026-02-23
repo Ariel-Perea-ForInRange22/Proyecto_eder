@@ -60,9 +60,14 @@ import Layout from '../layouts/Layout.astro';
   <script>
     import { Auth } from '../lib/auth';
     
-    // Si ya hay sesión activa, redirigir al dashboard
+    // Si ya hay sesión activa, redirigir al dashboard correspondiente
     if (Auth.isAuthenticated()) {
-      window.location.href = '/dashboard';
+      const session = Auth.getSession();
+      if (session?.rol === 'cliente') {
+        window.location.href = '/mi-cuenta';
+      } else {
+        window.location.href = '/dashboard';
+      }
     }
   </script>
 </Layout>

@@ -47,6 +47,57 @@ import DashboardLayout from '../layouts/DashboardLayout.astro';
           </div>
         </div>
       </a>
+
+      <!-- Tarjeta Citas -->
+      <a href="/citas" class="block bg-gradient-to-br from-blue-400 to-indigo-500 p-8 rounded-3xl shadow-2xl hover:shadow-blue-300 transition transform hover:scale-105 border-4 border-blue-200">
+        <div class="text-white">
+          <div class="flex items-center justify-between mb-4">
+            <div class="text-6xl drop-shadow-lg">📅</div>
+            <div class="text-right">
+              <div class="text-4xl font-bold drop-shadow-lg" id="citasCount">0</div>
+              <div class="text-blue-100 text-lg">Citas</div>
+            </div>
+          </div>
+          <div class="border-t-2 border-blue-300 pt-4">
+            <p class="font-bold text-lg">📋 Gestión de Citas</p>
+            <p class="text-sm text-blue-100 mt-1">Programar y administrar citas veterinarias</p>
+          </div>
+        </div>
+      </a>
+
+      <!-- Tarjeta Productos -->
+      <a href="/productos" class="block bg-gradient-to-br from-green-400 to-emerald-500 p-8 rounded-3xl shadow-2xl hover:shadow-green-300 transition transform hover:scale-105 border-4 border-green-200">
+        <div class="text-white">
+          <div class="flex items-center justify-between mb-4">
+            <div class="text-6xl drop-shadow-lg">📦</div>
+            <div class="text-right">
+              <div class="text-4xl font-bold drop-shadow-lg" id="productosCount">0</div>
+              <div class="text-green-100 text-lg">Productos</div>
+            </div>
+          </div>
+          <div class="border-t-2 border-green-300 pt-4">
+            <p class="font-bold text-lg">🛒 Inventario</p>
+            <p class="text-sm text-green-100 mt-1">Administrar productos y stock</p>
+          </div>
+        </div>
+      </a>
+
+      <!-- Tarjeta Generar PDF -->
+      <a href="/generar-pdf-citas" class="block bg-gradient-to-br from-red-400 to-rose-500 p-8 rounded-3xl shadow-2xl hover:shadow-red-300 transition transform hover:scale-105 border-4 border-red-200">
+        <div class="text-white">
+          <div class="flex items-center justify-between mb-4">
+            <div class="text-6xl drop-shadow-lg">📄</div>
+            <div class="text-right">
+              <div class="text-4xl font-bold drop-shadow-lg">PDF</div>
+              <div class="text-red-100 text-lg">Documentos</div>
+            </div>
+          </div>
+          <div class="border-t-2 border-red-300 pt-4">
+            <p class="font-bold text-lg">📥 Generar PDF</p>
+            <p class="text-sm text-red-100 mt-1">Documentación de citas con imágenes</p>
+          </div>
+        </div>
+      </a>
     </div>
 
     <!-- Actividad Reciente -->
@@ -106,22 +157,32 @@ import DashboardLayout from '../layouts/DashboardLayout.astro';
       const userRoleEl = document.getElementById('userRole');
       if (userNameEl) userNameEl.textContent = session.nombre;
       if (userTelefonoEl) userTelefonoEl.textContent = session.telefono || 'No registrado';
-      if (userRoleEl) userRoleEl.textContent = session.rol === 'admin' ? 'Administrador' : 'Veterinario';
+      if (userRoleEl) {
+        const roles: { [key: string]: string } = {
+          'admin': 'Administrador',
+          'veterinario': 'Veterinario',
+          'cliente': 'Cliente'
+        };
+        userRoleEl.textContent = roles[session.rol] || session.rol;
+      }
 
       // Obtener estadísticas
       const clientes = storage.getClientes(session.veterinariaId);
       const mascotas = storage.getMascotas(session.veterinariaId);
+      const citas = storage.getCitas(session.veterinariaId);
       const usuarios = storage.getUsuarios().filter(u => u.veterinariaId === session.veterinariaId);
 
       // Actualizar contadores
       const clientesCountEl = document.getElementById('clientesCount');
       const mascotasCountEl = document.getElementById('mascotasCount');
+      const citasCountEl = document.getElementById('citasCount');
       const totalClientesEl = document.getElementById('totalClientes');
       const totalMascotasEl = document.getElementById('totalMascotas');
       const totalVeterinariosEl = document.getElementById('totalVeterinarios');
 
       if (clientesCountEl) clientesCountEl.textContent = clientes.length.toString();
       if (mascotasCountEl) mascotasCountEl.textContent = mascotas.length.toString();
+      if (citasCountEl) citasCountEl.textContent = citas.length.toString();
       if (totalClientesEl) totalClientesEl.textContent = clientes.length.toString();
       if (totalMascotasEl) totalMascotasEl.textContent = mascotas.length.toString();
       if (totalVeterinariosEl) totalVeterinariosEl.textContent = usuarios.length.toString();

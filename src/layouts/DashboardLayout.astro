@@ -24,7 +24,9 @@ import '../styles/global.css';
             <a href="/dashboard" class="hover:bg-white hover:bg-opacity-20 px-4 py-2 rounded-xl transition backdrop-blur-sm">📊 Dashboard</a>
             <a href="/clientes" class="hover:bg-white hover:bg-opacity-20 px-4 py-2 rounded-xl transition backdrop-blur-sm">👥 Clientes</a>
             <a href="/mascotas" class="hover:bg-white hover:bg-opacity-20 px-4 py-2 rounded-xl transition backdrop-blur-sm">🐾 Mascotas</a>
+            <a href="/citas" class="hover:bg-white hover:bg-opacity-20 px-4 py-2 rounded-xl transition backdrop-blur-sm">📅 Citas</a>
             <a href="/productos" class="hover:bg-white hover:bg-opacity-20 px-4 py-2 rounded-xl transition backdrop-blur-sm">🛒 Productos</a>
+            <a href="/generar-pdf-citas" class="hover:bg-white hover:bg-opacity-20 px-4 py-2 rounded-xl transition backdrop-blur-sm">📄 PDF</a>
           </div>
         </div>
         <button id="logoutBtn" class="bg-rose-600 hover:bg-rose-700 px-4 py-2 rounded-xl transition shadow-lg">
@@ -44,11 +46,17 @@ import '../styles/global.css';
       window.location.href = '/';
     });
 
-    // Verificar autenticación
+    // Verificar autenticación y rol
     if (typeof window !== 'undefined') {
-      const session = localStorage.getItem('vet_session');
-      if (!session) {
+      const sessionData = localStorage.getItem('vet_session');
+      if (!sessionData) {
         window.location.href = '/';
+      } else {
+        const session = JSON.parse(sessionData);
+        // Si es cliente, redirigir a su dashboard
+        if (session.rol === 'cliente') {
+          window.location.href = '/mi-cuenta';
+        }
       }
     }
   </script>

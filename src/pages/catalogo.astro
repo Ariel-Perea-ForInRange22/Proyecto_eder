@@ -1,0 +1,466 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Catálogo de Productos">
+  <div class="min-h-screen bg-gradient-to-br from-green-100 via-teal-50 to-cyan-100 py-8 px-4">
+    <!-- Header con navegación -->
+    <div class="max-w-7xl mx-auto mb-6">
+      <div class="flex items-center justify-between bg-white bg-opacity-95 backdrop-blur-lg p-6 rounded-3xl shadow-2xl border-4 border-teal-200">
+        <div class="flex items-center gap-4">
+          <button
+            id="btnVolver"
+            class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3 px-6 rounded-xl transition transform hover:scale-105 shadow-lg"
+          >
+            ← Volver
+          </button>
+          <div>
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">🛒 Catálogo de Productos</h1>
+            <p class="text-teal-600 mt-1">Explora nuestros productos veterinarios</p>
+          </div>
+        </div>
+        <div id="userInfo" class="text-right">
+          <p class="text-sm text-teal-600">Usuario:</p>
+          <p id="userName" class="font-bold text-teal-700"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto space-y-6">
+      <!-- Búsqueda y Filtros -->
+      <div class="bg-white bg-opacity-95 backdrop-blur-lg p-6 rounded-3xl shadow-xl border-4 border-green-200">
+        <div class="mb-4 flex items-center gap-2 text-green-600">
+          <span class="font-bold text-lg">🔍 Buscar Productos</span>
+          <span class="text-sm bg-green-100 px-3 py-1 rounded-full">Filtra por nombre, categoría o especie</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+          <div class="md:col-span-4">
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="🔍 Buscar por nombre..."
+              class="w-full px-6 py-4 border-2 border-green-200 rounded-2xl focus:ring-4 focus:ring-green-300 focus:border-green-400 outline-none text-lg bg-gradient-to-r from-green-50 to-teal-50"
+            />
+          </div>
+          <div class="md:col-span-3">
+            <select
+              id="categoriaFilter"
+              class="w-full px-6 py-4 border-2 border-teal-200 rounded-2xl focus:ring-4 focus:ring-teal-300 outline-none bg-gradient-to-r from-teal-50 to-cyan-50 font-medium text-teal-700"
+            >
+              <option value="">📦 Todas las categorías</option>
+              <option value="Alimento">🍖 Alimentos</option>
+              <option value="Higiene">🧼 Higiene</option>
+              <option value="Juguetes">🎾 Juguetes</option>
+              <option value="Medicamentos">💊 Medicamentos</option>
+              <option value="Accesorios">🎀 Accesorios</option>
+              <option value="Otro">📌 Otro</option>
+            </select>
+          </div>
+          <div class="md:col-span-3">
+            <select
+              id="especieFilter"
+              class="w-full px-6 py-4 border-2 border-cyan-200 rounded-2xl focus:ring-4 focus:ring-cyan-300 outline-none bg-gradient-to-r from-cyan-50 to-green-50 font-medium text-green-700"
+            >
+              <option value="">🐾 Todas las especies</option>
+              <option value="Perro">🐕 Perro</option>
+              <option value="Gato">🐈 Gato</option>
+              <option value="Ave">🦜 Ave</option>
+              <option value="Conejo">🐰 Conejo</option>
+              <option value="Hámster">🐹 Hámster</option>
+              <option value="Reptil">🦎 Reptil</option>
+              <option value="Otro">🌟 Otro</option>
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <button
+              id="btnLimpiarFiltros"
+              class="w-full bg-gradient-to-r from-teal-500 to-green-500 hover:from-teal-600 hover:to-green-600 text-white font-bold px-6 py-4 rounded-2xl transition shadow-lg"
+            >
+              🔄 Limpiar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Opciones de visualización -->
+      <div class="bg-white bg-opacity-95 backdrop-blur-lg p-4 rounded-2xl shadow-lg border-2 border-teal-200">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <span class="text-teal-700 font-bold">Ver:</span>
+            <button id="btnMostrarTodos" class="px-4 py-2 bg-teal-100 hover:bg-teal-200 text-teal-700 font-bold rounded-xl transition">📦 Todos</button>
+            <button id="btnMostrarDisponibles" class="px-4 py-2 bg-green-100 hover:bg-green-200 text-green-700 font-bold rounded-xl transition">✅ Disponibles</button>
+            <button id="btnMostrarAgotados" class="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 font-bold rounded-xl transition">❌ Agotados</button>
+          </div>
+          <div class="flex items-center gap-4">
+            <span class="text-teal-700 font-bold">Ordenar:</span>
+            <select
+              id="ordenarSelect"
+              class="px-4 py-2 border-2 border-teal-200 rounded-xl focus:ring-2 focus:ring-teal-300 outline-none bg-teal-50 font-medium text-teal-700"
+            >
+              <option value="nombre">A-Z</option>
+              <option value="precio-asc">💰 Precio: Menor a Mayor</option>
+              <option value="precio-desc">💰 Precio: Mayor a Menor</option>
+              <option value="stock-asc">📊 Stock: Menor a Mayor</option>
+              <option value="stock-desc">📊 Stock: Mayor a Menor</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contador de resultados -->
+      <div class="bg-gradient-to-r from-green-100 to-teal-100 p-4 rounded-2xl shadow-lg border-2 border-green-300">
+        <div class="flex items-center justify-between">
+          <p id="countProductos" class="text-lg font-bold text-green-700"></p>
+          <div id="filtrosActivos" class="flex gap-2"></div>
+        </div>
+      </div>
+
+      <!-- Lista de Productos -->
+      <div id="productosList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <!-- Los productos se cargarán aquí -->
+      </div>
+
+      <!-- Mensaje de no hay productos -->
+      <div id="noProductos" class="hidden bg-white bg-opacity-95 backdrop-blur-lg p-12 rounded-3xl shadow-xl border-4 border-teal-200 text-center">
+        <div class="text-6xl mb-4">🔍</div>
+        <h3 class="text-2xl font-bold text-teal-700 mb-2">No se encontraron productos</h3>
+        <p class="text-teal-600">Intenta ajustar los filtros de búsqueda</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de detalles del producto -->
+  <div id="detalleModal" class="hidden fixed inset-0 flex items-center justify-center z-50" style="backdrop-filter: blur(10px); background-color: rgba(0, 0, 0, 0.3);">
+    <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border-4 border-green-300">
+      <div class="flex justify-between items-center mb-6">
+        <h3 id="detalleNombre" class="text-3xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent"></h3>
+        <button id="btnCerrarDetalle" class="text-teal-500 hover:text-teal-700 text-3xl font-bold">✕</button>
+      </div>
+
+      <div class="space-y-6">
+        <div class="flex items-center justify-between">
+          <div id="detalleIcono" class="text-6xl drop-shadow-lg"></div>
+          <div id="detalleStock" class="px-6 py-3 rounded-2xl text-xl font-bold border-3"></div>
+        </div>
+
+        <div class="bg-gradient-to-r from-green-50 to-teal-50 p-6 rounded-2xl border-2 border-green-200">
+          <h4 class="font-bold text-green-700 mb-2">📝 Descripción</h4>
+          <p id="detalleDescripcion" class="text-teal-700"></p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-gradient-to-br from-green-100 to-teal-100 p-4 rounded-2xl border-2 border-green-300">
+            <p class="text-sm text-green-600 mb-1">💰 Precio</p>
+            <p id="detallePrecio" class="text-3xl font-bold text-green-700"></p>
+          </div>
+          <div class="bg-gradient-to-br from-teal-100 to-cyan-100 p-4 rounded-2xl border-2 border-teal-300">
+            <p class="text-sm text-teal-600 mb-1">🗂️ Categoría</p>
+            <p id="detalleCategoria" class="text-2xl font-bold text-teal-700"></p>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-cyan-50 to-blue-50 p-6 rounded-2xl border-2 border-cyan-200">
+          <h4 class="font-bold text-cyan-700 mb-3">🐾 Especies Recomendadas</h4>
+          <div id="detalleEspecies" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <button
+          id="btnCerrarDetalleBottom"
+          class="w-full bg-gradient-to-r from-teal-500 to-green-500 hover:from-teal-600 hover:to-green-600 text-white font-bold py-4 rounded-2xl transition shadow-lg"
+        >
+          ✓ Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { storage } from '../lib/storage';
+    import { Auth } from '../lib/auth';
+    import type { Producto } from '../lib/types';
+
+    storage.init();
+
+    const session = Auth.getSession();
+    if (!session) {
+      window.location.href = '/login';
+    }
+
+    // Mostrar nombre de usuario
+    const userNameEl = document.getElementById('userName');
+    if (userNameEl && session) {
+      userNameEl.textContent = session.nombre;
+    }
+
+    const productosList = document.getElementById('productosList')!;
+    const noProductosEl = document.getElementById('noProductos')!;
+    const searchInput = document.getElementById('searchInput') as HTMLInputElement;
+    const categoriaFilter = document.getElementById('categoriaFilter') as HTMLSelectElement;
+    const especieFilter = document.getElementById('especieFilter') as HTMLSelectElement;
+    const ordenarSelect = document.getElementById('ordenarSelect') as HTMLSelectElement;
+    const detalleModal = document.getElementById('detalleModal')!;
+
+    let todosLosProductos: Producto[] = [];
+    let productosFiltrados: Producto[] = [];
+    let filtroStock: 'todos' | 'disponibles' | 'agotados' = 'todos';
+
+    // Función para obtener el icono de categoría
+    function getIconoCategoria(categoria: string): string {
+      const iconos: { [key: string]: string } = {
+        'Alimento': '🍖',
+        'Higiene': '🧼',
+        'Juguetes': '🎾',
+        'Medicamentos': '💊',
+        'Accesorios': '🎀',
+        'Otro': '📌'
+      };
+      return iconos[categoria] || '📦';
+    }
+
+    // Función para obtener emoji de especie
+    function getEmojiEspecie(especie: string): string {
+      const emojis: { [key: string]: string } = {
+        'Perro': '🐕',
+        'Gato': '🐈',
+        'Ave': '🦜',
+        'Conejo': '🐰',
+        'Hámster': '🐹',
+        'Reptil': '🦎',
+        'Otro': '🌟'
+      };
+      return emojis[especie] || '🐾';
+    }
+
+    // Función para ordenar productos
+    function ordenarProductos(productos: Producto[]): Producto[] {
+      const orden = ordenarSelect.value;
+      const copiaProductos = [...productos];
+
+      switch (orden) {
+        case 'nombre':
+          return copiaProductos.sort((a, b) => a.nombre.localeCompare(b.nombre));
+        case 'precio-asc':
+          return copiaProductos.sort((a, b) => a.precio - b.precio);
+        case 'precio-desc':
+          return copiaProductos.sort((a, b) => b.precio - a.precio);
+        case 'stock-asc':
+          return copiaProductos.sort((a, b) => a.stock - b.stock);
+        case 'stock-desc':
+          return copiaProductos.sort((a, b) => b.stock - a.stock);
+        default:
+          return copiaProductos;
+      }
+    }
+
+    // Función para renderizar productos
+    function renderProductos(productos: Producto[]) {
+      const productosOrdenados = ordenarProductos(productos);
+      const countEl = document.getElementById('countProductos');
+      
+      if (countEl) {
+        countEl.textContent = `📦 Mostrando ${productosOrdenados.length} ${productosOrdenados.length === 1 ? 'producto' : 'productos'}`;
+      }
+
+      // Mostrar filtros activos
+      const filtrosActivosEl = document.getElementById('filtrosActivos');
+      if (filtrosActivosEl) {
+        const tags = [];
+        if (searchInput.value) tags.push(`🔍 "${searchInput.value}"`);
+        if (categoriaFilter.value) tags.push(`📦 ${categoriaFilter.value}`);
+        if (especieFilter.value) tags.push(`🐾 ${especieFilter.value}`);
+        if (filtroStock !== 'todos') tags.push(`📊 ${filtroStock === 'disponibles' ? 'Disponibles' : 'Agotados'}`);
+        
+        filtrosActivosEl.innerHTML = tags.map(tag => 
+          `<span class="bg-teal-100 text-teal-700 px-3 py-1 rounded-full text-sm font-medium">${tag}</span>`
+        ).join('');
+      }
+
+      if (productosOrdenados.length === 0) {
+        productosList.classList.add('hidden');
+        noProductosEl.classList.remove('hidden');
+        return;
+      }
+
+      productosList.classList.remove('hidden');
+      noProductosEl.classList.add('hidden');
+
+      productosList.innerHTML = productosOrdenados.map(producto => {
+        const stockClass = producto.stock === 0 ? 'bg-red-100 text-red-700 border-red-300' :
+                          producto.stock < 10 ? 'bg-orange-100 text-orange-700 border-orange-300' : 
+                          producto.stock < 30 ? 'bg-yellow-100 text-yellow-700 border-yellow-300' : 
+                          'bg-green-100 text-green-700 border-green-300';
+        
+        const stockTexto = producto.stock === 0 ? '❌ Agotado' : `Stock: ${producto.stock}`;
+        
+        const especiesTexto = producto.especiesRecomendadas.length === 0 
+          ? '<span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-lg font-medium">🌟 Universal</span>' 
+          : producto.especiesRecomendadas.map(esp => 
+              `<span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-lg text-sm">${getEmojiEspecie(esp)} ${esp}</span>`
+            ).join(' ');
+        
+        return `
+          <div class="border-4 border-green-200 bg-gradient-to-br from-white via-green-50 to-teal-50 p-6 rounded-3xl hover:shadow-2xl transition transform hover:scale-105 cursor-pointer"
+               onclick="verDetalle('${producto.id}')">
+            <div class="flex items-start justify-between mb-4">
+              <div class="text-5xl drop-shadow-lg">${getIconoCategoria(producto.categoria)}</div>
+              <span class="${stockClass} px-4 py-2 rounded-full text-sm font-bold border-2 shadow-md">
+                ${stockTexto}
+              </span>
+            </div>
+            
+            <h4 class="text-xl font-bold text-teal-700 mb-2 line-clamp-2">${producto.nombre}</h4>
+            <p class="text-sm text-teal-600 mb-4 line-clamp-3">${producto.descripcion}</p>
+            
+            <div class="bg-gradient-to-r from-green-100 to-teal-100 p-3 rounded-xl border-2 border-green-200 mb-3">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-bold text-green-700">💰 Precio:</span>
+                <span class="text-2xl font-bold text-green-600">$${producto.precio.toFixed(2)}</span>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-xs font-bold text-teal-700">🗂️ Categoría:</span>
+                <span class="bg-teal-100 text-teal-700 px-3 py-1 rounded-lg text-sm font-medium">${producto.categoria}</span>
+              </div>
+            </div>
+            
+            <div class="pt-3 border-t-2 border-green-200">
+              <p class="text-xs font-bold text-cyan-700 mb-2">🐾 Recomendado para:</p>
+              <div class="flex flex-wrap gap-1">
+                ${especiesTexto}
+              </div>
+            </div>
+            
+            <button
+              class="w-full mt-4 bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-bold py-3 rounded-xl transition shadow-lg"
+              onclick="event.stopPropagation(); verDetalle('${producto.id}')"
+            >
+              👁️ Ver Detalles
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Función para filtrar productos
+    function filtrarProductos() {
+      const termino = searchInput.value.toLowerCase().trim();
+      const categoriaSeleccionada = categoriaFilter.value;
+      const especieSeleccionada = especieFilter.value;
+
+      productosFiltrados = todosLosProductos.filter(producto => {
+        // Filtro de búsqueda por nombre o descripción
+        const coincideTexto = !termino || 
+          producto.nombre.toLowerCase().includes(termino) ||
+          producto.descripcion.toLowerCase().includes(termino);
+
+        // Filtro de categoría
+        const coincideCategoria = !categoriaSeleccionada || producto.categoria === categoriaSeleccionada;
+
+        // Filtro de especie
+        const coincideEspecie = !especieSeleccionada || 
+          producto.especiesRecomendadas.length === 0 || 
+          producto.especiesRecomendadas.includes(especieSeleccionada);
+
+        // Filtro de stock
+        const coincideStock = filtroStock === 'todos' ||
+          (filtroStock === 'disponibles' && producto.stock > 0) ||
+          (filtroStock === 'agotados' && producto.stock === 0);
+
+        return coincideTexto && coincideCategoria && coincideEspecie && coincideStock;
+      });
+
+      renderProductos(productosFiltrados);
+    }
+
+    // Cargar productos
+    function cargarProductos() {
+      todosLosProductos = storage.getProductos(session!.veterinariaId);
+      productosFiltrados = todosLosProductos;
+      renderProductos(productosFiltrados);
+    }
+
+    // Ver detalle de producto
+    (window as any).verDetalle = (id: string) => {
+      const producto = todosLosProductos.find(p => p.id === id);
+      if (!producto) return;
+
+      document.getElementById('detalleNombre')!.textContent = producto.nombre;
+      document.getElementById('detalleIcono')!.textContent = getIconoCategoria(producto.categoria);
+      document.getElementById('detalleDescripcion')!.textContent = producto.descripcion;
+      document.getElementById('detallePrecio')!.textContent = `$${producto.precio.toFixed(2)}`;
+      document.getElementById('detalleCategoria')!.textContent = producto.categoria;
+
+      const stockEl = document.getElementById('detalleStock')!;
+      if (producto.stock === 0) {
+        stockEl.className = 'px-6 py-3 rounded-2xl text-xl font-bold border-3 bg-red-100 text-red-700 border-red-300';
+        stockEl.textContent = '❌ Agotado';
+      } else if (producto.stock < 10) {
+        stockEl.className = 'px-6 py-3 rounded-2xl text-xl font-bold border-3 bg-orange-100 text-orange-700 border-orange-300';
+        stockEl.textContent = `⚠️ Pocas unidades: ${producto.stock}`;
+      } else {
+        stockEl.className = 'px-6 py-3 rounded-2xl text-xl font-bold border-3 bg-green-100 text-green-700 border-green-300';
+        stockEl.textContent = `✅ Disponible: ${producto.stock}`;
+      }
+
+      const especiesEl = document.getElementById('detalleEspecies')!;
+      if (producto.especiesRecomendadas.length === 0) {
+        especiesEl.innerHTML = '<span class="bg-purple-100 text-purple-700 px-4 py-2 rounded-xl font-bold">🌟 Universal - Todas las especies</span>';
+      } else {
+        especiesEl.innerHTML = producto.especiesRecomendadas.map(esp =>
+          `<span class="bg-blue-100 text-blue-700 px-4 py-2 rounded-xl font-medium">${getEmojiEspecie(esp)} ${esp}</span>`
+        ).join('');
+      }
+
+      detalleModal.classList.remove('hidden');
+    };
+
+    // Cerrar modal de detalles
+    function cerrarDetalle() {
+      detalleModal.classList.add('hidden');
+    }
+
+    document.getElementById('btnCerrarDetalle')!.addEventListener('click', cerrarDetalle);
+    document.getElementById('btnCerrarDetalleBottom')!.addEventListener('click', cerrarDetalle);
+
+    // Eventos de filtros
+    searchInput.addEventListener('input', filtrarProductos);
+    categoriaFilter.addEventListener('change', filtrarProductos);
+    especieFilter.addEventListener('change', filtrarProductos);
+    ordenarSelect.addEventListener('change', () => renderProductos(productosFiltrados));
+
+    // Limpiar filtros
+    document.getElementById('btnLimpiarFiltros')!.addEventListener('click', () => {
+      searchInput.value = '';
+      categoriaFilter.value = '';
+      especieFilter.value = '';
+      filtroStock = 'todos';
+      cargarProductos();
+    });
+
+    // Filtros de stock
+    document.getElementById('btnMostrarTodos')!.addEventListener('click', () => {
+      filtroStock = 'todos';
+      filtrarProductos();
+    });
+
+    document.getElementById('btnMostrarDisponibles')!.addEventListener('click', () => {
+      filtroStock = 'disponibles';
+      filtrarProductos();
+    });
+
+    document.getElementById('btnMostrarAgotados')!.addEventListener('click', () => {
+      filtroStock = 'agotados';
+      filtrarProductos();
+    });
+
+    // Volver al dashboard
+    document.getElementById('btnVolver')!.addEventListener('click', () => {
+      window.location.href = '/mi-cuenta';
+    });
+
+    // Cargar productos al iniciar
+    cargarProductos();
+  </script>
+</Layout>
